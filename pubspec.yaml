@@ -1,0 +1,41 @@
+name: cheers_hotel_app
+description: Cheers Hotel Sales & Records App — dual-platform POS (desktop till + mobile order-taking).
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.3.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.6
+
+  # Backend
+  firebase_core: ^3.6.0
+  cloud_firestore: ^5.4.4
+  firebase_auth: ^5.3.1
+
+  # State management (kept intentionally light for V1)
+  provider: ^6.1.2
+
+  # Printing (desktop only — USB/LAN ESC/POS)
+  esc_pos_utils_plus: ^2.0.4
+  win32: ^5.5.4
+  ffi: ^2.1.3
+
+  # Charts for reporting
+  fl_chart: ^0.68.0
+
+  # Utilities
+  intl: ^0.19.0
+  uuid: ^4.4.0
+  connectivity_plus: ^6.0.5
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+
+flutter:
+  uses-material-design: true

@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 import '../main.dart' show kRestaurantName, kIsDesktop;
-import '../utils/connectivity_monitor.dart';
+import '../widgets/connectivity_banner.dart';
 import 'expenses_screen.dart';
 import 'menu_screen.dart';
 import 'order_screen.dart';
 import 'print_queue_screen.dart';
 import 'reports_screen.dart';
+import 'settings_screen.dart';
 
-/// App shell — bottom nav on mobile (narrow), side rail on desktop (wide).
-/// Desktop gets an extra "Print Queue" tab for incoming mobile orders.
+/// App shell — bottom nav on mobile, side rail on desktop.
+/// Desktop gets "Print Queue" + "Settings" extra tabs.
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -27,6 +27,7 @@ class _HomeScreenState extends State<HomeScreen> {
         if (kIsDesktop) const _NavItem('Print Queue', Icons.print),
         const _NavItem('Reports', Icons.bar_chart),
         const _NavItem('Expenses', Icons.receipt_long),
+        const _NavItem('Settings', Icons.settings),
       ];
 
   List<Widget> get _pages => [
@@ -35,28 +36,17 @@ class _HomeScreenState extends State<HomeScreen> {
         if (kIsDesktop) const PrintQueueScreen(),
         const ReportsScreen(),
         const ExpensesScreen(),
+        const SettingsScreen(),
       ];
 
   @override
   Widget build(BuildContext context) {
     final isWide = MediaQuery.of(context).size.width >= 800;
-    final connectivity = context.watch<ConnectivityMonitor>();
-
-    final body = isWide ? _buildDesktopLayout() : _buildMobileLayout();
 
     return Column(
       children: [
-        // Offline banner — visible on both desktop and mobile
-        if (!connectivity.isOnline)
-          MaterialBanner(
-            content: const Text(
-              'You are offline. Orders will sync when connection returns.',
-            ),
-            leading: const Icon(Icons.cloud_off, color: Colors.orange),
-            backgroundColor: Colors.orange.shade50,
-            actions: const [SizedBox.shrink()],
-          ),
-        Expanded(child: body),
+        const ConnectivityBanner(),
+        Expanded(child: isWide ? _buildDesktopLayout() : _buildMobileLayout()),
       ],
     );
   }

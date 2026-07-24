@@ -5,10 +5,12 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
 
 import 'firebase_options.dart';
+import 'services/auth_service.dart';
 import 'services/firestore_service.dart';
 import 'services/printer_service.dart';
 import 'utils/app_theme.dart';
 import 'utils/connectivity_monitor.dart';
+import 'utils/order_number_generator.dart';
 import 'screens/home_screen.dart';
 
 /// Change once per deployment if Cheers Hotel ever runs multiple branches.
@@ -28,6 +30,10 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
+  // Anonymous auth — satisfies Firestore rules (request.auth != null).
+  // Fails gracefully offline; Firestore cache still works.
+  await AuthService.signInAnonymously();
+
   runApp(const CheersHotelApp());
 }
 
@@ -43,6 +49,9 @@ class CheersHotelApp extends StatelessWidget {
         ),
         Provider<PrinterService>(
           create: (_) => PrinterService(),
+        ),
+        Provider<OrderNumberGenerator>(
+          create: (_) => OrderNumberGenerator(restaurantId: kRestaurantId),
         ),
         ChangeNotifierProvider<ConnectivityMonitor>(
           create: (_) => ConnectivityMonitor(),

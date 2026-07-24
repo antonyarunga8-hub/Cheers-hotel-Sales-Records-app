@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
-import '../models/order.dart' as order_model;
+
+import '../models/order.dart';
 import '../services/firestore_service.dart';
 
+/// View past orders for a selected date with expandable detail cards.
+/// Accessible from the Reports screen via the history icon.
 class OrderHistoryScreen extends StatefulWidget {
   const OrderHistoryScreen({super.key});
 
@@ -18,23 +21,19 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
     final DateTime? picked = await showDatePicker(
       context: context,
       initialDate: _selectedDate,
-      firstDate: DateTime(2020),
+      firstDate: DateTime(2024),
       lastDate: DateTime.now(),
     );
     if (picked != null && picked != _selectedDate) {
-      setState(() {
-        _selectedDate = picked;
-      });
+      setState(() => _selectedDate = picked);
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final firestoreService = Provider.of<FirestoreService>(context, listen: false);
-    
-    // Calculate start and end of the selected day
-    final startOfDay = DateTime(_selectedDate.year, _selectedDate.month, _selectedDate.day);
-    final endOfDay = startOfDay.add(const Duration(days: 1)).subtract(const Duration(milliseconds: 1));
+    final firestore = context.read<FirestoreService>();
+    final start = DateTime(_selectedDate.year, _selectedDate.month, _selectedDate.day);
+    final end = start.add(const Duration(days: 1));
 
     return Scaffold(
       appBar: AppBar(
@@ -48,21 +47,18 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
       ),
       body: Column(
         children: [
-          _buildDateHeader(),
+          _buildDateHeader(context),
           Expanded(
-            child: StreamBuilder<List<order_model.Order>>(
-              stream: firestoreService.watchOrdersBetween(startOfDay, endOfDay),
+            child: StreamBuilder<List<Order>>(
+              stream: firestore.watchOrdersBetween(start, end),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
                 }
-
                 if (snapshot.hasError) {
                   return Center(
-                    child: Text(
-                      'Error loading orders: ${snapshot.error}',
-                      style: TextStyle(color: Theme.of(context).colorScheme.error),
-                    ),
+                    child: Text('Error: ${snapshot.error}',
+                        style: TextStyle(color: Theme.of(context).colorScheme.error)),
                   );
                 }
 
@@ -70,15 +66,14 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
 
                 return Column(
                   children: [
-                    _buildSummaryCards(orders),
+                    _buildSummaryCards(context, orders),
                     Expanded(
                       child: orders.isEmpty
                           ? const Center(child: Text('No orders found for this date.'))
                           : ListView.builder(
+                              padding: const EdgeInsets.symmetric(horizontal: 12),
                               itemCount: orders.length,
-                              itemBuilder: (context, index) {
-                                return _buildOrderCard(orders[index]);
-                              },
+                              itemBuilder: (_, i) => _OrderCard(order: orders[i]),
                             ),
                     ),
                   ],
@@ -91,17 +86,15 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
     );
   }
 
-  Widget _buildDateHeader() {
+  Widget _buildDateHeader(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
-      color: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.3),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      color: Theme.of(context).colorScheme.surfaceContainerHighest,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(
-            'Showing orders for:',
-            style: Theme.of(context).textTheme.titleMedium,
-          ),
+          Text('Showing orders for:',
+              style: Theme.of(context).textTheme.titleMedium),
           TextButton.icon(
             onPressed: () => _selectDate(context),
             icon: const Icon(Icons.edit_calendar),
@@ -115,14 +108,11 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
     );
   }
 
-  Widget _buildSummaryCards(List<order_model.Order> orders) {
-    double totalSales = 0;
-    for (var order in orders) {
-      totalSales += order.totalAmount;
-    }
+  Widget _buildSummaryCards(BuildContext context, List<Order> orders) {
+    final totalSales = orders.fold<double>(0, (sum, o) => sum + o.total);
 
     return Padding(
-      padding: const EdgeInsets.all(16.0),
+      padding: const EdgeInsets.all(12),
       child: Row(
         children: [
           Expanded(
@@ -130,51 +120,39 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
               elevation: 0,
               color: Theme.of(context).colorScheme.primaryContainer,
               child: Padding(
-                padding: const EdgeInsets.all(16.0),
+                padding: const EdgeInsets.all(16),
                 child: Column(
                   children: [
-                    Text(
-                      'Total Orders',
-                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                            color: Theme.of(context).colorScheme.onPrimaryContainer,
-                          ),
-                    ),
+                    Text('Total Orders',
+                        style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                              color: Theme.of(context).colorScheme.onPrimaryContainer)),
                     const SizedBox(height: 8),
-                    Text(
-                      '${orders.length}',
-                      style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                            color: Theme.of(context).colorScheme.onPrimaryContainer,
-                            fontWeight: FontWeight.bold,
-                          ),
-                    ),
+                    Text('${orders.length}',
+                        style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: Theme.of(context).colorScheme.onPrimaryContainer)),
                   ],
                 ),
               ),
             ),
           ),
-          const SizedBox(width: 16),
+          const SizedBox(width: 12),
           Expanded(
             child: Card(
               elevation: 0,
               color: Theme.of(context).colorScheme.tertiaryContainer,
               child: Padding(
-                padding: const EdgeInsets.all(16.0),
+                padding: const EdgeInsets.all(16),
                 child: Column(
                   children: [
-                    Text(
-                      'Total Sales',
-                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                            color: Theme.of(context).colorScheme.onTertiaryContainer,
-                          ),
-                    ),
+                    Text('Total Sales',
+                        style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                              color: Theme.of(context).colorScheme.onTertiaryContainer)),
                     const SizedBox(height: 8),
-                    Text(
-                      'KES ${NumberFormat('#,##0.00').format(totalSales)}',
-                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                            color: Theme.of(context).colorScheme.onTertiaryContainer,
-                            fontWeight: FontWeight.bold,
-                          ),
-                    ),
+                    Text('KES ${NumberFormat('#,##0').format(totalSales)}',
+                        style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: Theme.of(context).colorScheme.onTertiaryContainer)),
                   ],
                 ),
               ),
@@ -184,97 +162,84 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
       ),
     );
   }
+}
 
-  Widget _buildOrderCard(order_model.Order order) {
-    final timeFormat = DateFormat('HH:mm');
-    final formattedTime = timeFormat.format(order.timestamp);
-    final currencyFormat = NumberFormat('#,##0.00');
+class _OrderCard extends StatelessWidget {
+  final Order order;
+  const _OrderCard({required this.order});
 
-    Color sourceColor = order.source == 'mobile' ? Colors.blue : Colors.purple;
+  @override
+  Widget build(BuildContext context) {
+    final timeStr = DateFormat('HH:mm').format(order.timestamp);
+    final isDesktop = order.source == OrderSource.desktop;
 
     return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+      margin: const EdgeInsets.only(bottom: 8),
       elevation: 1,
       child: ExpansionTile(
         title: Row(
           children: [
-            Text(
-              formattedTime,
-              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-            ),
+            Text(timeStr,
+                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
             const SizedBox(width: 12),
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
               decoration: BoxDecoration(
-                color: sourceColor.withOpacity(0.2),
+                color: isDesktop
+                    ? Colors.purple.shade50
+                    : Colors.blue.shade50,
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: sourceColor.withOpacity(0.5)),
               ),
               child: Text(
-                order.source.toUpperCase(),
+                isDesktop ? 'DESKTOP' : 'MOBILE',
                 style: TextStyle(
                   fontSize: 10,
                   fontWeight: FontWeight.bold,
-                  color: sourceColor,
+                  color: isDesktop ? Colors.purple.shade700 : Colors.blue.shade700,
                 ),
               ),
             ),
             const SizedBox(width: 8),
-            if (order.receiptPrinted)
-              const Icon(Icons.print, size: 16, color: Colors.green)
-            else
-              const Icon(Icons.print_disabled, size: 16, color: Colors.grey),
+            Icon(
+              order.receiptPrinted ? Icons.print : Icons.print_disabled,
+              size: 16,
+              color: order.receiptPrinted ? Colors.green : Colors.grey,
+            ),
           ],
         ),
         trailing: Text(
-          'KES ${currencyFormat.format(order.totalAmount)}',
-          style: const TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 16,
-          ),
+          'KES ${NumberFormat('#,##0').format(order.total)}',
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
         ),
         children: [
           const Divider(height: 1),
           Padding(
-            padding: const EdgeInsets.all(16.0),
+            padding: const EdgeInsets.all(16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'Order Items',
-                  style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey),
-                ),
+                Text('Order Items',
+                    style: TextStyle(
+                        fontWeight: FontWeight.bold, color: Colors.grey.shade600)),
                 const SizedBox(height: 8),
-                ...order.items.map((item) {
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 8.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Expanded(
-                          child: Text(
-                            '${item.quantity}x ${item.name}',
-                          ),
-                        ),
-                        Text(
-                          currencyFormat.format(item.totalPrice),
-                        ),
-                      ],
-                    ),
-                  );
-                }).toList(),
+                ...order.items.map((item) => Padding(
+                      padding: const EdgeInsets.only(bottom: 6),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(child: Text('${item.qty}x ${item.name}')),
+                          Text('KES ${item.lineTotal.toStringAsFixed(0)}'),
+                        ],
+                      ),
+                    )),
                 const Divider(),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text(
-                      'Total',
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    Text(
-                      'KES ${currencyFormat.format(order.totalAmount)}',
-                      style: const TextStyle(fontWeight: FontWeight.bold),
-                    ),
+                    const Text('Total',
+                        style: TextStyle(fontWeight: FontWeight.bold)),
+                    Text('KES ${NumberFormat('#,##0').format(order.total)}',
+                        style: const TextStyle(fontWeight: FontWeight.bold)),
                   ],
                 ),
               ],

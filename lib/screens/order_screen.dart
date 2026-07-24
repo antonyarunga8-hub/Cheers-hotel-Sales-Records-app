@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 import '../main.dart' show kRestaurantName;
 import '../models/menu_item.dart';
 import '../models/order.dart' as model;
+import '../models/payment_method.dart';
 import '../services/firestore_service.dart';
 import '../services/printer_service.dart';
+import '../utils/order_number_generator.dart';
 import '../widgets/menu_item_card.dart';
 
 /// Order recording flow — works identically on desktop and mobile
@@ -18,9 +21,10 @@ class OrderScreen extends StatefulWidget {
 }
 
 class _OrderScreenState extends State<OrderScreen> {
-  final Map<String, int> _cart = {}; // itemId -> qty
+  final Map<String, int> _cart = {};
   Map<String, MenuItem> _itemsById = {};
   bool _submitting = false;
+  PaymentMethod _paymentMethod = PaymentMethod.cash;
 
   double get _total {
     double sum = 0;
@@ -46,16 +50,93 @@ class _OrderScreenState extends State<OrderScreen> {
     });
   }
 
+  /// Show confirmation dialog before recording the sale.
+  Future<void> _confirmAndRecord() async {
+    if (_cart.isEmpty) return;
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Confirm Order'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ..._cart.entries.map((e) {
+              final item = _itemsById[e.key];
+              if (item == null) return const SizedBox.shrink();
+              return Padding(
+                padding: const EdgeInsets.symmetric(vertical: 2),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(child: Text('${e.value}x ${item.name}')),
+                    Text('KES ${(item.price * e.value).toStringAsFixed(0)}'),
+                  ],
+                ),
+              );
+            }),
+            const Divider(height: 20),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text('TOTAL',
+                    style: TextStyle(fontWeight: FontWeight.bold)),
+                Text('KES ${_total.toStringAsFixed(0)}',
+                    style: const TextStyle(fontWeight: FontWeight.bold)),
+              ],
+            ),
+            const SizedBox(height: 16),
+            // Payment method selector
+            SegmentedButton<PaymentMethod>(
+              segments: const [
+                ButtonSegment(
+                    value: PaymentMethod.cash,
+                    label: Text('Cash'),
+                    icon: Icon(Icons.money)),
+                ButtonSegment(
+                    value: PaymentMethod.mpesa,
+                    label: Text('M-Pesa'),
+                    icon: Icon(Icons.phone_android)),
+              ],
+              selected: {_paymentMethod},
+              onSelectionChanged: (s) =>
+                  setState(() => _paymentMethod = s.first),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: const Text('Cancel')),
+          FilledButton(
+              onPressed: () => Navigator.pop(ctx, true),
+              child: const Text('Record Sale')),
+        ],
+      ),
+    );
+
+    if (confirmed == true) await _recordSale();
+  }
+
   Future<void> _recordSale() async {
     if (_cart.isEmpty || _submitting) return;
     setState(() => _submitting = true);
 
     final firestore = context.read<FirestoreService>();
     final printer = context.read<PrinterService>();
+    final orderNumGen = context.read<OrderNumberGenerator>();
+
+    // Get sequential order number
+    int orderNumber;
+    try {
+      orderNumber = await orderNumGen.next();
+    } catch (_) {
+      orderNumber = DateTime.now().millisecondsSinceEpoch % 1000;
+    }
 
     final lines = _cart.entries.map((e) {
       final item = _itemsById[e.key]!;
-      // Price-at-time-of-sale captured here (doc §8 — data integrity).
       return model.OrderLine(
           itemId: item.id, name: item.name, price: item.price, qty: e.value);
     }).toList();
@@ -65,35 +146,41 @@ class _OrderScreenState extends State<OrderScreen> {
       items: lines,
       total: model.Order.totalOf(lines),
       timestamp: DateTime.now(),
-      recordedBy: 'staff', // replace with real staff identity in V2 (staff logins)
+      recordedBy: 'staff',
       source: printer.isPrintingSupported
           ? model.OrderSource.desktop
           : model.OrderSource.mobile,
+      paymentMethod: _paymentMethod,
     );
 
     final orderId = await firestore.recordOrder(order);
 
     if (printer.isPrintingSupported) {
-      final result = await printer.printReceipt(order, restaurantName: kRestaurantName);
+      final result = await printer.printReceipt(order,
+          restaurantName: kRestaurantName);
       if (result == PrintResult.success) {
         await firestore.markReceiptPrinted(orderId);
       } else if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Order saved, but printer is not connected. It will retry.'),
-          ),
+              content:
+                  Text('Order saved, but printer not connected. Will retry.')),
         );
       }
     }
 
     setState(() {
       _cart.clear();
+      _paymentMethod = PaymentMethod.cash;
       _submitting = false;
     });
 
     if (mounted) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text('Sale recorded.')));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(
+            'Sale #${OrderNumberGenerator.format(orderNumber)} recorded — '
+            'KES ${NumberFormat('#,##0').format(order.total)}'),
+      ));
     }
   }
 
@@ -152,6 +239,7 @@ class _OrderScreenState extends State<OrderScreen> {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surfaceContainerHighest,
         border: Border(top: BorderSide(color: Theme.of(context).dividerColor)),
       ),
       child: Column(
@@ -178,12 +266,14 @@ class _OrderScreenState extends State<OrderScreen> {
           Row(
             children: [
               Text('Total: KES ${_total.toStringAsFixed(0)}',
-                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                  style: const TextStyle(
+                      fontWeight: FontWeight.bold, fontSize: 16)),
               const Spacer(),
               FilledButton.icon(
-                onPressed: _submitting ? null : _recordSale,
+                onPressed: _submitting ? null : _confirmAndRecord,
                 icon: const Icon(Icons.check),
-                label: Text(_submitting ? 'Recording...' : 'Record Sale'),
+                label:
+                    Text(_submitting ? 'Recording...' : 'Record Sale'),
               ),
             ],
           ),

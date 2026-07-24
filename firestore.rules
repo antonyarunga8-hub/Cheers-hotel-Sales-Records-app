@@ -1,0 +1,39 @@
+rules_version = '2';
+
+// Cheers Hotel Sales & Records App — Firestore Security Rules (V1)
+// Deploy: firebase deploy --only firestore:rules
+//
+// V1 uses a single anonymous/shared auth session per device.
+// V2 will add per-staff logins with role-based rules.
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // All data lives under /restaurants/{restaurantId}/...
+    match /restaurants/{restaurantId} {
+
+      // Anyone authenticated can read the restaurant doc
+      allow read: if request.auth != null;
+
+      // Menu items — read by desktop + mobile; write by authenticated users
+      match /menuItems/{itemId} {
+        allow read:  if request.auth != null;
+        allow write: if request.auth != null;
+      }
+
+      // Orders — both desktop and mobile write here
+      match /orders/{orderId} {
+        allow read:  if request.auth != null;
+        allow create: if request.auth != null
+                       && request.resource.data.keys().hasAll(['items', 'total', 'timestamp', 'source']);
+        allow update: if request.auth != null;
+      }
+
+      // Expenses — desktop-only in V1, but rules allow any authenticated write
+      match /expenses/{expenseId} {
+        allow read:  if request.auth != null;
+        allow write: if request.auth != null;
+      }
+    }
+  }
+}

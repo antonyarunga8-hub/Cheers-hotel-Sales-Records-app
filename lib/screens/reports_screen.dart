@@ -4,6 +4,8 @@ import 'package:provider/provider.dart';
 
 import '../models/order.dart';
 import '../services/firestore_service.dart';
+import '../widgets/sales_chart.dart';
+import 'order_history_screen.dart';
 
 enum _Period { today, week, month }
 
@@ -42,7 +44,19 @@ class _ReportsScreenState extends State<ReportsScreen> {
     final (start, end) = _range();
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Reports')),
+      appBar: AppBar(
+        title: const Text('Reports'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.history),
+            tooltip: 'Order History',
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const OrderHistoryScreen()),
+            ),
+          ),
+        ],
+      ),
       body: Column(
         children: [
           Padding(
@@ -83,22 +97,38 @@ class _ReportsScreenState extends State<ReportsScreen> {
                 return ListView(
                   padding: const EdgeInsets.all(16),
                   children: [
+                    // Sales chart — only show for week/month when there's data
+                    if (_period != _Period.today && orders.isNotEmpty)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 16),
+                        child: SalesChart(orders: orders),
+                      ),
+
                     _StatCard(
+                      icon: Icons.attach_money,
                       label: 'Total Sales',
                       value: 'KES ${NumberFormat('#,##0').format(totalSales)}',
                     ),
-                    _StatCard(label: 'Orders', value: '${orders.length}'),
                     _StatCard(
+                      icon: Icons.receipt,
+                      label: 'Orders',
+                      value: '${orders.length}',
+                    ),
+                    _StatCard(
+                      icon: Icons.devices,
                       label: 'By Source',
-                      value: 'Desktop: $desktopCount  •  Mobile: $mobileCount',
+                      value:
+                          'Desktop: $desktopCount  •  Mobile: $mobileCount',
                     ),
                     const SizedBox(height: 16),
                     const Text('Top Items',
-                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold, fontSize: 16)),
                     const SizedBox(height: 8),
-                    ...sortedTop.take(3).map(
+                    ...sortedTop.take(5).map(
                           (e) => ListTile(
-                            leading: const Icon(Icons.star, color: Colors.amber),
+                            leading:
+                                const Icon(Icons.star, color: Colors.amber),
                             title: Text(e.key),
                             trailing: Text('${e.value} sold'),
                           ),
@@ -106,7 +136,8 @@ class _ReportsScreenState extends State<ReportsScreen> {
                     if (sortedTop.isEmpty)
                       const Padding(
                         padding: EdgeInsets.symmetric(vertical: 12),
-                        child: Text('No sales recorded for this period yet.'),
+                        child:
+                            Text('No sales recorded for this period yet.'),
                       ),
                   ],
                 );
@@ -120,16 +151,20 @@ class _ReportsScreenState extends State<ReportsScreen> {
 }
 
 class _StatCard extends StatelessWidget {
+  final IconData icon;
   final String label;
   final String value;
-  const _StatCard({required this.label, required this.value});
+  const _StatCard(
+      {required this.icon, required this.label, required this.value});
 
   @override
   Widget build(BuildContext context) {
     return Card(
       child: ListTile(
+        leading: Icon(icon, color: Theme.of(context).colorScheme.primary),
         title: Text(label),
-        trailing: Text(value, style: const TextStyle(fontWeight: FontWeight.bold)),
+        trailing:
+            Text(value, style: const TextStyle(fontWeight: FontWeight.bold)),
       ),
     );
   }

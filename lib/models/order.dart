@@ -1,5 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+import 'payment_method.dart';
+
 /// Where an order originated. Desktop is the only device wired to the
 /// printer; mobile-originated orders get confirmed/printed from desktop.
 enum OrderSource { desktop, mobile }
@@ -52,6 +54,7 @@ class Order {
   final DateTime timestamp;
   final String recordedBy;
   final OrderSource source;
+  final PaymentMethod paymentMethod;
   final bool synced;
   final bool receiptPrinted;
 
@@ -62,6 +65,7 @@ class Order {
     required this.timestamp,
     required this.recordedBy,
     required this.source,
+    this.paymentMethod = PaymentMethod.cash,
     this.synced = true,
     this.receiptPrinted = false,
   });
@@ -79,6 +83,8 @@ class Order {
       timestamp: ts is Timestamp ? ts.toDate() : DateTime.now(),
       recordedBy: data['recordedBy'] as String? ?? 'unknown',
       source: orderSourceFromString(data['source'] as String?),
+      paymentMethod:
+          paymentMethodFromString(data['paymentMethod'] as String?),
       synced: data['synced'] as bool? ?? true,
       receiptPrinted: data['receiptPrinted'] as bool? ?? false,
     );
@@ -90,6 +96,7 @@ class Order {
         'timestamp': Timestamp.fromDate(timestamp),
         'recordedBy': recordedBy,
         'source': orderSourceToString(source),
+        'paymentMethod': paymentMethodToString(paymentMethod),
         'synced': synced,
         'receiptPrinted': receiptPrinted,
       };

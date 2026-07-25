@@ -1,15 +1,7 @@
-// GENERATED PLACEHOLDER — Replace after running: flutterfire configure
-//
-// This placeholder lets the project compile for web deployment on GitHub Pages.
-// To connect to YOUR Firebase project:
-//   1. Go to console.firebase.google.com → Create project
-//   2. Add a Web app → copy the config
-//   3. Run: dart pub global activate flutterfire_cli
-//   4. Run: flutterfire configure --project=<your-project-id>
-//   5. That replaces this file with real keys.
+// Generated from Firebase Console — cheers-hotel-c5f47
+// Web app: Cheers Hotel POS
 
-import 'package:firebase_core/firebase_core.dart'
-    show FirebaseOptions;
+import 'package:firebase_core/firebase_core.dart' show FirebaseOptions;
 import 'package:flutter/foundation.dart'
     show defaultTargetPlatform, kIsWeb, TargetPlatform;
 
@@ -18,54 +10,43 @@ class DefaultFirebaseOptions {
     if (kIsWeb) return web;
     switch (defaultTargetPlatform) {
       case TargetPlatform.windows:
-        return windows;
+        return web; // Windows uses same config as web for Firestore
       case TargetPlatform.android:
         return android;
       case TargetPlatform.iOS:
         return ios;
       default:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions not configured for this platform. '
-          'Run: flutterfire configure',
-        );
+        return web;
     }
   }
 
   // ──── WEB ────
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'REPLACE_WITH_FLUTTERFIRE_CONFIGURE_OUTPUT',
-    appId: 'REPLACE_WITH_FLUTTERFIRE_CONFIGURE_OUTPUT',
-    messagingSenderId: 'REPLACE_WITH_FLUTTERFIRE_CONFIGURE_OUTPUT',
-    projectId: 'REPLACE_WITH_FLUTTERFIRE_CONFIGURE_OUTPUT',
-    authDomain: 'REPLACE_WITH_FLUTTERFIRE_CONFIGURE_OUTPUT',
-    storageBucket: 'REPLACE_WITH_FLUTTERFIRE_CONFIGURE_OUTPUT',
+    apiKey: 'AIzaSyDDv8CwVxEKAkqaj5CmZkk2YglH64jd4qE',
+    authDomain: 'cheers-hotel-c5f47.firebaseapp.com',
+    projectId: 'cheers-hotel-c5f47',
+    storageBucket: 'cheers-hotel-c5f47.firebasestorage.app',
+    messagingSenderId: '379932426570',
+    appId: '1:379932426570:web:0f668aa961c30815bb01b3',
+    measurementId: 'G-QPV3VH3CKH',
   );
 
-  // ──── WINDOWS ────
-  static const FirebaseOptions windows = FirebaseOptions(
-    apiKey: 'REPLACE_WITH_FLUTTERFIRE_CONFIGURE_OUTPUT',
-    appId: 'REPLACE_WITH_FLUTTERFIRE_CONFIGURE_OUTPUT',
-    messagingSenderId: 'REPLACE_WITH_FLUTTERFIRE_CONFIGURE_OUTPUT',
-    projectId: 'REPLACE_WITH_FLUTTERFIRE_CONFIGURE_OUTPUT',
-    storageBucket: 'REPLACE_WITH_FLUTTERFIRE_CONFIGURE_OUTPUT',
-  );
-
-  // ──── ANDROID ────
+  // ──── ANDROID (same project, add Android app in console later) ────
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'REPLACE_WITH_FLUTTERFIRE_CONFIGURE_OUTPUT',
-    appId: 'REPLACE_WITH_FLUTTERFIRE_CONFIGURE_OUTPUT',
-    messagingSenderId: 'REPLACE_WITH_FLUTTERFIRE_CONFIGURE_OUTPUT',
-    projectId: 'REPLACE_WITH_FLUTTERFIRE_CONFIGURE_OUTPUT',
-    storageBucket: 'REPLACE_WITH_FLUTTERFIRE_CONFIGURE_OUTPUT',
+    apiKey: 'AIzaSyDDv8CwVxEKAkqaj5CmZkk2YglH64jd4qE',
+    appId: '1:379932426570:web:0f668aa961c30815bb01b3',
+    messagingSenderId: '379932426570',
+    projectId: 'cheers-hotel-c5f47',
+    storageBucket: 'cheers-hotel-c5f47.firebasestorage.app',
   );
 
-  // ──── iOS ────
+  // ──── iOS (same project, add iOS app in console later) ────
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'REPLACE_WITH_FLUTTERFIRE_CONFIGURE_OUTPUT',
-    appId: 'REPLACE_WITH_FLUTTERFIRE_CONFIGURE_OUTPUT',
-    messagingSenderId: 'REPLACE_WITH_FLUTTERFIRE_CONFIGURE_OUTPUT',
-    projectId: 'REPLACE_WITH_FLUTTERFIRE_CONFIGURE_OUTPUT',
-    storageBucket: 'REPLACE_WITH_FLUTTERFIRE_CONFIGURE_OUTPUT',
+    apiKey: 'AIzaSyDDv8CwVxEKAkqaj5CmZkk2YglH64jd4qE',
+    appId: '1:379932426570:web:0f668aa961c30815bb01b3',
+    messagingSenderId: '379932426570',
+    projectId: 'cheers-hotel-c5f47',
+    storageBucket: 'cheers-hotel-c5f47.firebasestorage.app',
     iosBundleId: 'com.cheershotel.app',
   );
 }

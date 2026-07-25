@@ -1,4 +1,5 @@
-import 'dart:io' show Platform;
+import 'package:flutter/foundation.dart'
+    show kIsWeb, defaultTargetPlatform, TargetPlatform;
 
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -19,11 +20,8 @@ const String kRestaurantName = 'Cheers Hotel';
 
 /// True only on the Windows desktop build (the device wired to the printer).
 bool get kIsDesktop {
-  try {
-    return Platform.isWindows;
-  } catch (_) {
-    return false;
-  }
+  if (kIsWeb) return false;
+  return defaultTargetPlatform == TargetPlatform.windows;
 }
 
 Future<void> main() async {
@@ -31,7 +29,6 @@ Future<void> main() async {
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
   // Anonymous auth — satisfies Firestore rules (request.auth != null).
-  // Fails gracefully offline; Firestore cache still works.
   await AuthService.signInAnonymously();
 
   runApp(const CheersHotelApp());

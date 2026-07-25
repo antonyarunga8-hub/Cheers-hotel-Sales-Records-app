@@ -1,4 +1,4 @@
-import 'dart:io' show Platform;
+import 'package:flutter/foundation.dart' show kIsWeb, defaultTargetPlatform, TargetPlatform;
 
 import '../models/order.dart';
 import '../utils/receipt_formatter.dart';
@@ -17,7 +17,8 @@ abstract class PrinterService {
   bool get isPrintingSupported;
 
   factory PrinterService() {
-    if (Platform.isWindows) {
+    if (kIsWeb) return NoOpPrinterService();
+    if (defaultTargetPlatform == TargetPlatform.windows) {
       return WindowsEscPosPrinterService();
     }
     return NoOpPrinterService();
@@ -27,14 +28,9 @@ abstract class PrinterService {
 /// Real desktop implementation. Sends ESC/POS-formatted bytes to the
 /// Xprinter XP-Q80A over USB (primary) via the Windows raw print spooler,
 /// with a LAN socket (port 9100) fallback per doc §5 and §16.
-///
-/// NOTE: the raw win32 spooler call and the LAN socket fallback are left
-/// as clearly marked TODOs — they depend on the exact printer share name
-/// / IP configured on-site, which should be set once during install.
 class WindowsEscPosPrinterService implements PrinterService {
-  // Configure these once during on-site setup.
-  static const String usbPrinterName = 'XP-Q80A'; // Windows printer share name
-  static const String lanFallbackIp = '192.168.1.100'; // set to printer's IP
+  static const String usbPrinterName = 'XP-Q80A';
+  static const String lanFallbackIp = '192.168.1.100';
   static const int lanFallbackPort = 9100;
 
   final List<Order> _fallbackQueue = [];
@@ -48,9 +44,6 @@ class WindowsEscPosPrinterService implements PrinterService {
     try {
       final bytes = ReceiptFormatter.format(order, restaurantName);
 
-      // TODO(install): wire up the actual win32 RAW spooler call here, e.g.
-      //   OpenPrinter(usbPrinterName) -> StartDocPrinter -> WritePrinter(bytes)
-      // or fall back to a raw TCP write to lanFallbackIp:lanFallbackPort.
       final sent = await _sendToUsbSpooler(bytes);
       if (!sent) {
         final lanSent = await _sendToLan(bytes);
@@ -66,7 +59,6 @@ class WindowsEscPosPrinterService implements PrinterService {
     }
   }
 
-  /// Orders that failed to print and are waiting for retry/reprint.
   List<Order> get pendingRetries => List.unmodifiable(_fallbackQueue);
 
   Future<void> retryQueued({required String restaurantName}) async {
@@ -80,18 +72,18 @@ class WindowsEscPosPrinterService implements PrinterService {
   }
 
   Future<bool> _sendToUsbSpooler(List<int> bytes) async {
-    // Placeholder — returns false until wired to win32 spooler on-site.
+    // TODO(install): Wire up win32 RAW spooler on-site.
     return false;
   }
 
   Future<bool> _sendToLan(List<int> bytes) async {
-    // Placeholder — returns false until the printer's LAN IP is confirmed.
+    // TODO(install): Wire up LAN socket to printer IP on-site.
     return false;
   }
 }
 
-/// Mobile (and any non-Windows) build. Printing is never attempted here —
-/// the mobile app relies on the desktop till to print every order.
+/// Mobile, web, and any non-Windows build. Printing is never attempted —
+/// the mobile/web app relies on the desktop till to print every order.
 class NoOpPrinterService implements PrinterService {
   @override
   bool get isPrintingSupported => false;

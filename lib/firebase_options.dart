@@ -1,24 +1,21 @@
-// GENERATED PLACEHOLDER — DO NOT USE IN PRODUCTION.
+// GENERATED PLACEHOLDER — Replace after running: flutterfire configure
 //
-// Replace this entire file by running, from the project root:
-//   flutterfire configure --project=<your-firebase-project-id>
-//
-// That command generates a real firebase_options.dart wired to your actual
-// Firebase project (Web/Android/iOS/Windows app configs). This placeholder
-// only exists so the project compiles/lints before that step is run.
+// This placeholder lets the project compile for web deployment on GitHub Pages.
+// To connect to YOUR Firebase project:
+//   1. Go to console.firebase.google.com → Create project
+//   2. Add a Web app → copy the config
+//   3. Run: dart pub global activate flutterfire_cli
+//   4. Run: flutterfire configure --project=<your-project-id>
+//   5. That replaces this file with real keys.
 
-import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_core/firebase_core.dart'
+    show FirebaseOptions;
 import 'package:flutter/foundation.dart'
     show defaultTargetPlatform, kIsWeb, TargetPlatform;
 
 class DefaultFirebaseOptions {
   static FirebaseOptions get currentPlatform {
-    if (kIsWeb) {
-      throw UnsupportedError(
-        'Web is not configured for Cheers Hotel App V1. '
-        'Run flutterfire configure to add a web target if needed.',
-      );
-    }
+    if (kIsWeb) return web;
     switch (defaultTargetPlatform) {
       case TargetPlatform.windows:
         return windows;
@@ -28,12 +25,23 @@ class DefaultFirebaseOptions {
         return ios;
       default:
         throw UnsupportedError(
-          'DefaultFirebaseOptions are not configured for this platform. '
-          'Run flutterfire configure.',
+          'DefaultFirebaseOptions not configured for this platform. '
+          'Run: flutterfire configure',
         );
     }
   }
 
+  // ──── WEB ────
+  static const FirebaseOptions web = FirebaseOptions(
+    apiKey: 'REPLACE_WITH_FLUTTERFIRE_CONFIGURE_OUTPUT',
+    appId: 'REPLACE_WITH_FLUTTERFIRE_CONFIGURE_OUTPUT',
+    messagingSenderId: 'REPLACE_WITH_FLUTTERFIRE_CONFIGURE_OUTPUT',
+    projectId: 'REPLACE_WITH_FLUTTERFIRE_CONFIGURE_OUTPUT',
+    authDomain: 'REPLACE_WITH_FLUTTERFIRE_CONFIGURE_OUTPUT',
+    storageBucket: 'REPLACE_WITH_FLUTTERFIRE_CONFIGURE_OUTPUT',
+  );
+
+  // ──── WINDOWS ────
   static const FirebaseOptions windows = FirebaseOptions(
     apiKey: 'REPLACE_WITH_FLUTTERFIRE_CONFIGURE_OUTPUT',
     appId: 'REPLACE_WITH_FLUTTERFIRE_CONFIGURE_OUTPUT',
@@ -42,6 +50,7 @@ class DefaultFirebaseOptions {
     storageBucket: 'REPLACE_WITH_FLUTTERFIRE_CONFIGURE_OUTPUT',
   );
 
+  // ──── ANDROID ────
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'REPLACE_WITH_FLUTTERFIRE_CONFIGURE_OUTPUT',
     appId: 'REPLACE_WITH_FLUTTERFIRE_CONFIGURE_OUTPUT',
@@ -50,6 +59,7 @@ class DefaultFirebaseOptions {
     storageBucket: 'REPLACE_WITH_FLUTTERFIRE_CONFIGURE_OUTPUT',
   );
 
+  // ──── iOS ────
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'REPLACE_WITH_FLUTTERFIRE_CONFIGURE_OUTPUT',
     appId: 'REPLACE_WITH_FLUTTERFIRE_CONFIGURE_OUTPUT',

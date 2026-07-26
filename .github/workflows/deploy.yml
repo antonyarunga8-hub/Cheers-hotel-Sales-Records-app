@@ -25,11 +25,21 @@ jobs:
           flutter-version: '3.24.0'
           channel: 'stable'
 
+      - name: Enable web
+        run: flutter config --enable-web
+
+      - name: Create web project files
+        run: |
+          flutter create --platforms web . || true
+
       - name: Install dependencies
         run: flutter pub get
 
+      - name: Analyze (show errors only)
+        run: dart analyze --no-fatal-warnings || true
+
       - name: Build web
-        run: flutter build web --release --base-href "/Cheers-hotel-Sales-Records-app/"
+        run: flutter build web --release --web-renderer html --base-href "/Cheers-hotel-Sales-Records-app/"
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3

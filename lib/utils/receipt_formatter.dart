@@ -1,104 +1,62 @@
-import 'package:esc_pos_utils_plus/esc_pos_utils_plus.dart';
 import 'package:intl/intl.dart';
 
 import '../models/order.dart';
 import '../models/payment_method.dart';
 
-/// Builds the ESC/POS byte stream for a printed receipt: restaurant name,
-/// order number, itemized list, total, payment method, date/time,
-/// and a "Thank you" footer (doc §7.3).
+/// Builds a plain-text receipt string for display previews and
+/// non-ESC/POS output. The actual ESC/POS byte stream for the
+/// Xprinter XP-Q80A is generated in WindowsEscPosPrinterService.
 class ReceiptFormatter {
-  static List<int> format(
+  /// Returns a human-readable receipt string (for on-screen preview
+  /// and non-thermal output).
+  static String format(
     Order order,
     String restaurantName, {
     int? orderNumber,
   }) {
-    final profile = CapabilityProfile.getDefault();
-    final generator = Generator(PaperSize.mm80, profile);
-    final bytes = <int>[];
+    final buf = StringBuffer();
+    final width = 32;
 
-    // Header — restaurant name
-    bytes.addAll(generator.text(
-      restaurantName,
-      styles: const PosStyles(
-          align: PosAlign.center,
-          bold: true,
-          height: PosTextSize.size2,
-          width: PosTextSize.size2),
-    ));
-
-    // Order number (if available)
+    buf.writeln(restaurantName.padLeft((width + restaurantName.length) ~/ 2));
     if (orderNumber != null) {
-      bytes.addAll(generator.text(
-        'Order #${orderNumber.toString().padLeft(3, '0')}',
-        styles: const PosStyles(align: PosAlign.center, bold: true),
-      ));
+      final num = 'Order #${orderNumber.toString().padLeft(3, '0')}';
+      buf.writeln(num.padLeft((width + num.length) ~/ 2));
     }
 
-    // Date and time
-    bytes.addAll(generator.text(
-      DateFormat('dd MMM yyyy, HH:mm').format(order.timestamp),
-      styles: const PosStyles(align: PosAlign.center),
-    ));
+    final dateStr = DateFormat('dd MMM yyyy, HH:mm').format(order.timestamp);
+    buf.writeln(dateStr.padLeft((width + dateStr.length) ~/ 2));
 
-    // Source badge
     final sourceLabel =
         order.source == OrderSource.mobile ? 'Mobile Order' : 'Till Order';
-    bytes.addAll(generator.text(
-      sourceLabel,
-      styles: const PosStyles(align: PosAlign.center),
-    ));
+    buf.writeln(sourceLabel.padLeft((width + sourceLabel.length) ~/ 2));
 
-    bytes.addAll(generator.hr());
+    buf.writeln('─' * width);
 
-    // Line items
     for (final line in order.items) {
-      bytes.addAll(generator.row([
-        PosColumn(text: '${line.qty}x ${line.name}', width: 8),
-        PosColumn(
-          text: line.lineTotal.toStringAsFixed(0),
-          width: 4,
-          styles: const PosStyles(align: PosAlign.right),
-        ),
-      ]));
+      final name = '${line.qty}x ${line.name}';
+      final price = line.lineTotal.toStringAsFixed(0);
+      final pad = width - name.length - price.length;
+      buf.writeln('$name${' ' * (pad > 0 ? pad : 1)}$price');
     }
 
-    bytes.addAll(generator.hr());
+    buf.writeln('─' * width);
 
-    // Total
-    bytes.addAll(generator.row([
-      PosColumn(
-        text: 'TOTAL (KES)',
-        width: 8,
-        styles: const PosStyles(bold: true),
-      ),
-      PosColumn(
-        text: order.total.toStringAsFixed(0),
-        width: 4,
-        styles: const PosStyles(align: PosAlign.right, bold: true),
-      ),
-    ]));
+    final totalLabel = 'TOTAL (KES)';
+    final totalValue = order.total.toStringAsFixed(0);
+    final totalPad = width - totalLabel.length - totalValue.length;
+    buf.writeln('$totalLabel${' ' * (totalPad > 0 ? totalPad : 1)}$totalValue');
 
-    // Payment method
     final paymentLabel = order.paymentMethod == PaymentMethod.mpesa
         ? 'Paid via M-Pesa'
         : 'Paid in Cash';
-    bytes.addAll(generator.text(
-      paymentLabel,
-      styles: const PosStyles(align: PosAlign.center),
-    ));
+    buf.writeln(paymentLabel.padLeft((width + paymentLabel.length) ~/ 2));
 
-    bytes.addAll(generator.feed(1));
-    bytes.addAll(generator.text(
-      'Thank you for dining with us!',
-      styles: const PosStyles(align: PosAlign.center),
-    ));
-    bytes.addAll(generator.text(
-      'Cheers Hotel — Nairobi',
-      styles: const PosStyles(align: PosAlign.center),
-    ));
-    bytes.addAll(generator.cut());
+    buf.writeln();
+    const thanks = 'Thank you for dining with us!';
+    buf.writeln(thanks.padLeft((width + thanks.length) ~/ 2));
+    const footer = 'Cheers Hotel — Nairobi';
+    buf.writeln(footer.padLeft((width + footer.length) ~/ 2));
 
-    return bytes;
+    return buf.toString();
   }
 }

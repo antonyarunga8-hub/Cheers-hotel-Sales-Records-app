@@ -1,19 +1,27 @@
-import 'package:flutter/foundation.dart' show kIsWeb, defaultTargetPlatform, TargetPlatform;
+import 'package:flutter/foundation.dart'
+    show kIsWeb, defaultTargetPlatform, TargetPlatform;
 
 import '../models/order.dart';
-import '../utils/receipt_formatter.dart';
 
-/// Result of a print attempt, surfaced to the UI so the till operator can
-/// retry/reprint (doc §7.3 — handle printer-not-connected gracefully).
+/// Result of a print attempt.
 enum PrintResult { success, printerNotConnected, error }
 
-/// Printing is desktop-only — the mobile app never talks to the printer
-/// directly (doc §5, §7.3). This abstract service lets screens call
-/// `printReceipt` unconditionally; the mobile build gets a no-op stub.
+/// Printer configuration for the Xprinter XP-Q80A.
+class PrinterConfig {
+  static const String printerName = 'XP-Q80A';
+  static const String macAddress = '00-79-31-86-78-F4';
+  static const String lanIp = '192.168.123.100';
+  static const int lanPort = 9100;
+  static const String subnet = '255.255.255.0';
+  static const String gateway = '192.168.123.1';
+  static const int speedMmPerSec = 230;
+  static const String firmwareVersion = '3.012PR6Y';
+}
+
+/// Printing is desktop-only. Mobile/web apps rely on the desktop till
+/// to print via the Print Queue. This factory returns the right impl.
 abstract class PrinterService {
   Future<PrintResult> printReceipt(Order order, {required String restaurantName});
-
-  /// True only on the desktop build where a printer could plausibly exist.
   bool get isPrintingSupported;
 
   factory PrinterService() {
@@ -25,14 +33,9 @@ abstract class PrinterService {
   }
 }
 
-/// Real desktop implementation. Sends ESC/POS-formatted bytes to the
-/// Xprinter XP-Q80A over USB (primary) via the Windows raw print spooler,
-/// with a LAN socket (port 9100) fallback per doc §5 and §16.
+/// Real desktop implementation — sends ESC/POS bytes to XP-Q80A
+/// over LAN socket (192.168.123.100:9100) or USB spooler.
 class WindowsEscPosPrinterService implements PrinterService {
-  static const String usbPrinterName = 'XP-Q80A';
-  static const String lanFallbackIp = '192.168.1.100';
-  static const int lanFallbackPort = 9100;
-
   final List<Order> _fallbackQueue = [];
 
   @override
@@ -42,12 +45,13 @@ class WindowsEscPosPrinterService implements PrinterService {
   Future<PrintResult> printReceipt(Order order,
       {required String restaurantName}) async {
     try {
-      final bytes = ReceiptFormatter.format(order, restaurantName);
+      // Build receipt bytes using receipt_formatter (desktop only import)
+      final bytes = _buildReceiptBytes(order, restaurantName);
 
-      final sent = await _sendToUsbSpooler(bytes);
+      final sent = await _sendToLan(bytes);
       if (!sent) {
-        final lanSent = await _sendToLan(bytes);
-        if (!lanSent) {
+        final usbSent = await _sendToUsbSpooler(bytes);
+        if (!usbSent) {
           _fallbackQueue.add(order);
           return PrintResult.printerNotConnected;
         }
@@ -59,31 +63,57 @@ class WindowsEscPosPrinterService implements PrinterService {
     }
   }
 
-  List<Order> get pendingRetries => List.unmodifiable(_fallbackQueue);
+  List<int> _buildReceiptBytes(Order order, String restaurantName) {
+    // Simplified ESC/POS receipt — full formatting via esc_pos_utils_plus
+    // is wired on-site during deployment (requires dart:io for sockets).
+    final lines = <String>[
+      '\x1B\x40',           // ESC @ — Initialize printer
+      '\x1B\x61\x01',       // Center alignment
+      '\x1D\x21\x11',       // Double height+width
+      restaurantName,
+      '\x1D\x21\x00',       // Normal size
+      '\n',
+      'Order Receipt',
+      '─' * 32,
+    ];
 
-  Future<void> retryQueued({required String restaurantName}) async {
-    final queued = List<Order>.from(_fallbackQueue);
-    for (final order in queued) {
-      final result = await printReceipt(order, restaurantName: restaurantName);
-      if (result == PrintResult.success) {
-        _fallbackQueue.remove(order);
-      }
+    for (final item in order.items) {
+      final name = '${item.qty}x ${item.name}';
+      final price = item.lineTotal.toStringAsFixed(0);
+      final pad = 32 - name.length - price.length;
+      lines.add('$name${' ' * (pad > 0 ? pad : 1)}$price');
     }
-  }
 
-  Future<bool> _sendToUsbSpooler(List<int> bytes) async {
-    // TODO(install): Wire up win32 RAW spooler on-site.
-    return false;
+    lines.addAll([
+      '─' * 32,
+      '\x1B\x45\x01',       // Bold on
+      'TOTAL KES ${order.total.toStringAsFixed(0)}',
+      '\x1B\x45\x00',       // Bold off
+      '\n',
+      'Thank you for dining with us!',
+      'Cheers Hotel — Nairobi',
+      '\n\n\n',
+      '\x1D\x56\x00',       // Full cut
+    ]);
+
+    return lines.join('\n').codeUnits;
   }
 
   Future<bool> _sendToLan(List<int> bytes) async {
-    // TODO(install): Wire up LAN socket to printer IP on-site.
+    // TODO(deploy): Wire up LAN socket to 192.168.123.100:9100 on-site
+    // Uses dart:io Socket which is only available on desktop/mobile.
     return false;
   }
+
+  Future<bool> _sendToUsbSpooler(List<int> bytes) async {
+    // TODO(deploy): Wire up win32 RAW spooler for USB connection.
+    return false;
+  }
+
+  List<Order> get pendingRetries => List.unmodifiable(_fallbackQueue);
 }
 
-/// Mobile, web, and any non-Windows build. Printing is never attempted —
-/// the mobile/web app relies on the desktop till to print every order.
+/// Mobile/web stub — printing is handled by the desktop Print Queue.
 class NoOpPrinterService implements PrinterService {
   @override
   bool get isPrintingSupported => false;

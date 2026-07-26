@@ -10,7 +10,7 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
-  final _printerIpCtrl = TextEditingController(text: '192.168.1.100');
+  final _printerIpCtrl = TextEditingController(text: '192.168.123.100');
   final _printerNameCtrl = TextEditingController(text: 'XP-Q80A');
 
   @override
@@ -88,7 +88,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   _InfoRow(label: 'App', value: 'Cheers Hotel — Sales & Records'),
                   _InfoRow(label: 'Version', value: '1.0.0 (V1)'),
                   _InfoRow(label: 'Printer Model', value: 'Xprinter XP-Q80A'),
-                  _InfoRow(label: 'Interface', value: 'USB + LAN (port 9100)'),
+                  _InfoRow(label: 'Printer IP', value: '192.168.123.100:9100'),
+                  _InfoRow(label: 'MAC Address', value: '00-79-31-86-78-F4'),
+                  _InfoRow(label: 'Gateway', value: '192.168.123.1'),
+                  _InfoRow(label: 'Speed', value: '230mm/s'),
+                  _InfoRow(label: 'Firmware', value: '3.012PR6Y'),
                   _InfoRow(label: 'Paper Width', value: '80mm'),
                   const Divider(height: 24),
                   _InfoRow(label: 'Developer', value: 'Antony Arunga'),

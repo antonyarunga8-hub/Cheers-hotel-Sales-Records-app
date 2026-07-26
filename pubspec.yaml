@@ -19,8 +19,6 @@ dependencies:
   # State management (kept intentionally light for V1)
   provider: ^6.1.2
 
-  # Printing (desktop only — USB/LAN ESC/POS)
-  esc_pos_utils_plus: ^2.0.4
 
   # Charts for reporting
   fl_chart: ^0.68.0

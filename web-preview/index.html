@@ -3,99 +3,255 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Cheers Hotel — Sales & Records POS</title>
+  <title>Cheers Hotel — POS System</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <!-- Sidebar -->
+  <!-- Sidebar Navigation -->
   <nav class="sidebar">
     <div class="sidebar-brand">
       <div class="brand-icon">C<span>H</span></div>
-      <span class="brand-name">Cheers Hotel</span>
+      <div class="brand-titles">
+        <span class="brand-name">Cheers Hotel</span>
+        <span class="brand-sub">POS & Management</span>
+      </div>
     </div>
+    
+    <!-- Staff Selector -->
+    <div class="staff-selector-box">
+      <label for="activeStaff">👤 Operating Staff</label>
+      <select id="activeStaff" onchange="onStaffChange(this.value)">
+        <option value="Cathy">Cathy</option>
+        <option value="Aggy">Aggy</option>
+        <option value="Evelyne">Evelyne</option>
+        <option value="Wendy">Wendy</option>
+        <option value="Caro">Caro</option>
+      </select>
+    </div>
+
     <div class="nav-items">
-      <button class="nav-btn active" data-tab="order" onclick="switchTab('order')">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="18" rx="2"/><line x1="8" y1="21" x2="8" y2="13"/><line x1="16" y1="21" x2="16" y2="13"/></svg>
-        <span>Order</span>
+      <button class="nav-btn active" data-tab="dashboard" onclick="switchTab('dashboard')">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        <span>Dashboard</span>
       </button>
+
+      <button class="nav-btn" data-tab="order" onclick="switchTab('order')">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="18" rx="2"/><line x1="8" y1="21" x2="8" y2="13"/><line x1="16" y1="21" x2="16" y2="13"/></svg>
+        <span>New Order</span>
+        <span class="badge" id="navCartBadge" style="display:none;">0</span>
+      </button>
+
+      <button class="nav-btn" data-tab="kitchen" onclick="switchTab('kitchen')">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a10 10 0 0 0-10 10c0 5.5 4.5 10 10 10s10-4.5 10-10A10 10 0 0 0 12 2zm1 14h-2v-2h2v2zm0-4h-2V7h2v5z"/></svg>
+        <span>Kitchen Display</span>
+        <span class="badge warning" id="kitchenBadge">0</span>
+      </button>
+
+      <button class="nav-btn" data-tab="transactions" onclick="switchTab('transactions')">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+        <span>Transactions</span>
+      </button>
+
       <button class="nav-btn" data-tab="menu" onclick="switchTab('menu')">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 002-2V2"/><path d="M7 2v20"/><path d="M21 15V2a5 5 0 00-5 5v6c0 1.1.9 2 2 2h3zm0 0v7"/></svg>
-        <span>Menu</span>
+        <span>Menu Management</span>
       </button>
-      <button class="nav-btn" data-tab="analytics" onclick="switchTab('analytics')">
+
+      <button class="nav-btn" data-tab="analytics" onclick="requestAdminAuth('analytics')">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
-        <span>Analytics</span>
+        <span>Analytics 🔒</span>
       </button>
+
       <button class="nav-btn" data-tab="expenses" onclick="switchTab('expenses')">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
         <span>Expenses</span>
       </button>
+
       <button class="nav-btn" data-tab="settings" onclick="switchTab('settings')">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
         <span>Settings</span>
       </button>
     </div>
+
     <div class="sidebar-footer">
       <div class="connection-status" id="connectionStatus">
         <span class="status-dot online"></span>
-        <span>Online</span>
+        <span>Online Syncing</span>
       </div>
     </div>
   </nav>
 
-  <!-- Main Content -->
+  <!-- Main Workspace -->
   <main class="main-content">
     <header class="top-bar">
-      <h1 id="pageTitle">New Order</h1>
+      <div class="top-title-area">
+        <h1 id="pageTitle">Dashboard</h1>
+        <span class="active-staff-badge" id="activeStaffBadge">Staff: Cathy</span>
+      </div>
       <div class="top-bar-right">
-        <span class="time" id="clock"></span>
+        <div class="quick-stats-pill" id="quickSalesPill">Today: KES 0</div>
+        <span class="time" id="clock">--:--</span>
       </div>
     </header>
 
+    <!-- DASHBOARD TAB -->
+    <section class="tab-content active" id="tab-dashboard">
+      <div class="dash-welcome">
+        <h2>Welcome back, <span id="dashStaffName">Cathy</span>! 👋</h2>
+        <p>Here is your daily summary for Cheers Hotel POS.</p>
+      </div>
+
+      <div class="stats-grid" id="dashStatsGrid"></div>
+
+      <div class="analytics-row">
+        <div class="analytics-card">
+          <h3>Quick Actions</h3>
+          <div class="quick-actions-grid">
+            <button class="action-card-btn" onclick="switchTab('order')">
+              <span class="btn-icon">🛒</span>
+              <span>New Order</span>
+            </button>
+            <button class="action-card-btn" onclick="switchTab('kitchen')">
+              <span class="btn-icon">🍳</span>
+              <span>Kitchen Display</span>
+            </button>
+            <button class="action-card-btn" onclick="switchTab('expenses')">
+              <span class="btn-icon">💸</span>
+              <span>Add Expense</span>
+            </button>
+            <button class="action-card-btn" onclick="requestAdminAuth('analytics')">
+              <span class="btn-icon">📊</span>
+              <span>View Analytics</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="analytics-card">
+          <h3>Today's Popular Items</h3>
+          <div id="dashPopularItems"></div>
+        </div>
+      </div>
+
+      <div class="analytics-card full-width">
+        <h3>Live Orders Stream</h3>
+        <div id="dashRecentOrders"></div>
+      </div>
+    </section>
+
     <!-- ORDER TAB -->
-    <section class="tab-content active" id="tab-order">
+    <section class="tab-content" id="tab-order">
       <div class="order-layout">
-        <!-- Category filter -->
         <div class="order-left">
-          <div class="category-filter" id="categoryFilter"></div>
+          <!-- Search & Filter Controls -->
+          <div class="order-toolbar">
+            <div class="search-box">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <input type="text" id="menuSearchInput" placeholder="Search item (e.g. Chapati, Chai, Nyama)..." oninput="onSearchInput(this.value)">
+              <button class="clear-search-btn" id="clearSearchBtn" onclick="clearSearch()" style="display:none;">✕</button>
+            </div>
+            <div class="category-filter" id="categoryFilter"></div>
+          </div>
+
           <div class="menu-grid" id="menuGrid"></div>
         </div>
-        <div class="cart-panel" id="cartPanel" style="display:none;">
-          <h3>Current Order</h3>
-          <div class="cart-items" id="cartItems"></div>
+
+        <!-- Pinned Running Cart Panel -->
+        <div class="cart-panel" id="cartPanel">
+          <div class="cart-header">
+            <h3>Current Order</h3>
+            <span class="cart-staff-label" id="cartStaffLabel">By: Cathy</span>
+          </div>
+          
+          <div class="cart-items" id="cartItems">
+            <div class="cart-empty-msg">
+              <span class="cart-empty-icon">🛒</span>
+              <p>No items in cart</p>
+              <small>Tap menu items on the left to add</small>
+            </div>
+          </div>
+
           <div class="cart-footer">
             <div class="payment-toggle">
               <button class="pay-btn active" data-method="cash" onclick="setPayment('cash')">💵 Cash</button>
               <button class="pay-btn" data-method="mpesa" onclick="setPayment('mpesa')">📱 M-Pesa</button>
             </div>
+            <div class="cart-summary-line">
+              <span>Items Count</span>
+              <span id="cartCountLabel">0</span>
+            </div>
             <div class="cart-total">
-              <span>Total</span>
+              <span>Total Amount</span>
               <span id="cartTotal">KES 0</span>
             </div>
-            <button class="btn-primary btn-record" onclick="confirmOrder()">✓ Record Sale</button>
+            <button class="btn-primary btn-record" id="btnRecord" onclick="confirmOrder()" disabled>✓ Place & Record Sale</button>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- MENU TAB -->
+    <!-- KITCHEN DISPLAY SYSTEM TAB -->
+    <section class="tab-content" id="tab-kitchen">
+      <div class="tab-header">
+        <h2>Kitchen Display System (KDS)</h2>
+        <span class="kds-refresh-note">Auto-updates live</span>
+      </div>
+      <div class="kds-grid" id="kdsGrid"></div>
+    </section>
+
+    <!-- TRANSACTIONS TAB -->
+    <section class="tab-content" id="tab-transactions">
+      <div class="tab-header">
+        <h2>Order Transactions History</h2>
+        <div class="transactions-filter">
+          <input type="date" id="txnDateFilter" onchange="loadTransactions()">
+          <select id="txnStaffFilter" onchange="loadTransactions()">
+            <option value="ALL">All Staff</option>
+            <option value="Cathy">Cathy</option>
+            <option value="Aggy">Aggy</option>
+            <option value="Evelyne">Evelyne</option>
+            <option value="Wendy">Wendy</option>
+            <option value="Caro">Caro</option>
+          </select>
+        </div>
+      </div>
+      <div class="transactions-summary" id="txnSummary"></div>
+      <div class="transactions-table-container">
+        <table class="txn-table">
+          <thead>
+            <tr>
+              <th>Order ID / Time</th>
+              <th>Staff</th>
+              <th>Items</th>
+              <th>Payment</th>
+              <th>Source</th>
+              <th>Total (KES)</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="txnTableBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- MENU MANAGEMENT TAB -->
     <section class="tab-content" id="tab-menu">
       <div class="tab-header">
-        <h2>Menu Management</h2>
+        <h2>Menu Items Management</h2>
         <div class="tab-header-actions">
-          <button class="btn-secondary" onclick="seedMenu()">🔄 Reset Full Menu</button>
+          <button class="btn-secondary" onclick="cleanAndDeduplicateMenu()">✨ Deduplicate Menu</button>
+          <button class="btn-secondary" onclick="seedMenu()">🔄 Reset Full Stock Menu</button>
           <button class="btn-primary" onclick="showAddItemModal()">+ Add Item</button>
         </div>
       </div>
       <div class="menu-list" id="menuList"></div>
     </section>
 
-    <!-- ANALYTICS TAB -->
+    <!-- ANALYTICS TAB (ADMIN PROTECTED) -->
     <section class="tab-content" id="tab-analytics">
       <div class="tab-header">
-        <h2>Sales Analytics</h2>
+        <h2>Sales Analytics & Performance 🔒</h2>
         <div class="period-toggle">
           <button class="period-btn active" onclick="setPeriod('today', this)">Today</button>
           <button class="period-btn" onclick="setPeriod('week', this)">This Week</button>
@@ -103,19 +259,27 @@
         </div>
       </div>
       <div class="stats-grid" id="statsGrid"></div>
+
+      <!-- Sales Trend Chart (SVG) -->
+      <div class="analytics-card full-width">
+        <h3>Sales Trend Graph</h3>
+        <div class="chart-container" id="salesTrendChart"></div>
+      </div>
+
       <div class="analytics-row">
         <div class="analytics-card">
           <h3>Top Selling Items</h3>
           <div id="topItems"></div>
         </div>
         <div class="analytics-card">
-          <h3>Sales by Category</h3>
-          <div id="categoryBreakdown"></div>
+          <h3>Sales by Staff Member</h3>
+          <div id="staffSalesBreakdown"></div>
         </div>
       </div>
+
       <div class="analytics-card full-width">
-        <h3>Recent Orders</h3>
-        <div id="recentOrders"></div>
+        <h3>Category Revenue Breakdown</h3>
+        <div id="categoryBreakdown"></div>
       </div>
     </section>
 
@@ -131,9 +295,9 @@
 
     <!-- SETTINGS TAB -->
     <section class="tab-content" id="tab-settings">
-      <div class="tab-header"><h2>Settings</h2></div>
+      <div class="tab-header"><h2>System & Hardware Settings</h2></div>
       <div class="settings-grid">
-        <!-- Admin Settings -->
+        <!-- Admin Settings Card -->
         <div class="settings-card">
           <div class="settings-card-header">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
@@ -144,28 +308,24 @@
             <input type="text" id="settingRestName" value="Cheers Hotel">
           </div>
           <div class="settings-row">
-            <label>Restaurant ID</label>
-            <input type="text" value="cheers-hotel-main" disabled>
+            <label>Admin Passcode (PIN)</label>
+            <input type="password" id="settingAdminPin" value="1234">
           </div>
           <div class="settings-row">
-            <label>Currency</label>
-            <input type="text" value="KES (Kenyan Shilling)" disabled>
+            <label>Receipt Footer Message</label>
+            <input type="text" id="settingFooter" value="Thank you for dining with us! Cheers Hotel Nairobi">
           </div>
           <div class="settings-row">
-            <label>Receipt Footer</label>
-            <input type="text" id="settingFooter" value="Thank you for dining with us!">
-          </div>
-          <div class="settings-row">
-            <label>Order Source</label>
+            <label>Order Source Mode</label>
             <select id="settingSource">
-              <option value="desktop" selected>Desktop (Till)</option>
-              <option value="mobile">Mobile (Tableside)</option>
+              <option value="desktop" selected>Desktop Till</option>
+              <option value="mobile">Mobile Waiter</option>
             </select>
           </div>
-          <button class="btn-primary" onclick="saveAdminSettings()" style="margin-top:12px;">Save Settings</button>
+          <button class="btn-primary" onclick="saveAdminSettings()">Save Admin Config</button>
         </div>
 
-        <!-- Printer Configuration -->
+        <!-- Separate Printer Configuration Card -->
         <div class="settings-card">
           <div class="settings-card-header">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
@@ -173,48 +333,33 @@
           </div>
           <div class="printer-status">
             <span class="status-indicator connected">●</span>
-            <span>Xprinter XP-Q80A — Connected via LAN</span>
+            <span>Xprinter XP-Q80A (Wired LAN / USB)</span>
           </div>
           <div class="settings-info-grid">
-            <div class="info-item"><span class="info-label">Model</span><span class="info-value">Xprinter XP-Q80A</span></div>
+            <div class="info-item"><span class="info-label">Printer Model</span><span class="info-value">Xprinter XP-Q80A</span></div>
             <div class="info-item"><span class="info-label">IP Address</span><span class="info-value">192.168.123.100</span></div>
             <div class="info-item"><span class="info-label">Port</span><span class="info-value">9100</span></div>
             <div class="info-item"><span class="info-label">MAC Address</span><span class="info-value">00-79-31-86-78-F4</span></div>
-            <div class="info-item"><span class="info-label">Subnet</span><span class="info-value">255.255.255.0</span></div>
+            <div class="info-item"><span class="info-label">Subnet Mask</span><span class="info-value">255.255.255.0</span></div>
             <div class="info-item"><span class="info-label">Gateway</span><span class="info-value">192.168.123.1</span></div>
             <div class="info-item"><span class="info-label">Print Speed</span><span class="info-value">230mm/s</span></div>
-            <div class="info-item"><span class="info-label">Paper Width</span><span class="info-value">80mm thermal</span></div>
+            <div class="info-item"><span class="info-label">Paper Width</span><span class="info-value">80mm Thermal</span></div>
             <div class="info-item"><span class="info-label">Firmware</span><span class="info-value">3.012PR6Y</span></div>
-            <div class="info-item"><span class="info-label">Interface</span><span class="info-value">USB + LAN</span></div>
+            <div class="info-item"><span class="info-label">Status</span><span class="info-value">Ready / Auto-Cut</span></div>
           </div>
         </div>
 
-        <!-- App Info -->
-        <div class="settings-card">
-          <div class="settings-card-header">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-            <h3>App Info</h3>
-          </div>
-          <div class="settings-info-grid">
-            <div class="info-item"><span class="info-label">App</span><span class="info-value">Cheers Hotel — Sales & Records</span></div>
-            <div class="info-item"><span class="info-label">Version</span><span class="info-value">1.0.0 (V1)</span></div>
-            <div class="info-item"><span class="info-label">Firebase</span><span class="info-value">cheers-hotel-bf5ce</span></div>
-            <div class="info-item"><span class="info-label">Developer</span><span class="info-value">Antony Arunga</span></div>
-            <div class="info-item"><span class="info-label">Client</span><span class="info-value">Enose Mugalla — Cheers Hotel</span></div>
-            <div class="info-item"><span class="info-label">Doc Version</span><span class="info-value">3.0 — July 2026</span></div>
-          </div>
-        </div>
-
-        <!-- Data Management -->
+        <!-- Data Management Card -->
         <div class="settings-card">
           <div class="settings-card-header">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
-            <h3>Data Management</h3>
+            <h3>Database & System Maintenance</h3>
           </div>
-          <p class="settings-desc">Manage your restaurant data and menu items.</p>
+          <p class="settings-desc">Manage stock items, deduplicate list, or clear test transactions.</p>
           <div class="settings-actions">
-            <button class="btn-secondary" onclick="seedMenu()">🔄 Load Full Menu from Stock Sheet</button>
-            <button class="btn-secondary danger" onclick="clearAllOrders()">🗑️ Clear Today's Orders</button>
+            <button class="btn-secondary" onclick="cleanAndDeduplicateMenu()">✨ Clean & Deduplicate Menu</button>
+            <button class="btn-secondary" onclick="seedMenu()">🔄 Reset Menu from Stock Sheet</button>
+            <button class="btn-secondary danger" onclick="clearAllOrders()">🗑️ Clear All Orders</button>
           </div>
         </div>
       </div>
@@ -222,17 +367,59 @@
   </main>
 
   <!-- MODALS -->
+
+  <!-- Admin PIN Prompt Modal -->
+  <div class="modal-overlay" id="adminAuthModal">
+    <div class="modal">
+      <h3>🔒 Admin Passcode Required</h3>
+      <p style="color:#6b7280;margin-bottom:16px;font-size:14px;">Enter Admin PIN to view Sales Analytics.</p>
+      <div class="form-group">
+        <input type="password" id="adminPinInput" placeholder="Enter PIN (Default: 1234)" autofocus>
+      </div>
+      <div class="modal-actions">
+        <button class="btn-secondary" onclick="closeModal('adminAuthModal')">Cancel</button>
+        <button class="btn-primary" onclick="verifyAdminPin()">Unlock Analytics</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit Item Modal -->
+  <div class="modal-overlay" id="editItemModal">
+    <div class="modal">
+      <h3>Edit Menu Item</h3>
+      <input type="hidden" id="editItemId">
+      <div class="form-group"><label>Item Name</label><input type="text" id="editItemName"></div>
+      <div class="form-group"><label>Price (KES)</label><input type="number" id="editItemPrice"></div>
+      <div class="form-group"><label>Category</label>
+        <select id="editItemCategory">
+          <option value="Mains">Mains</option>
+          <option value="Breakfast">Breakfast</option>
+          <option value="Snacks">Snacks</option>
+          <option value="Drinks">Drinks</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label><input type="checkbox" id="editItemAvailable"> Available / In Stock</label>
+      </div>
+      <div class="modal-actions">
+        <button class="btn-secondary" onclick="closeModal('editItemModal')">Cancel</button>
+        <button class="btn-primary" onclick="saveEditedMenuItem()">Save Changes</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Item Modal -->
   <div class="modal-overlay" id="addItemModal">
     <div class="modal">
-      <h3>Add Menu Item</h3>
-      <div class="form-group"><label>Item Name</label><input type="text" id="itemName" placeholder="e.g., Grilled Tilapia"></div>
-      <div class="form-group"><label>Price (KES)</label><input type="number" id="itemPrice" placeholder="e.g., 1200"></div>
+      <h3>Add New Menu Item</h3>
+      <div class="form-group"><label>Item Name</label><input type="text" id="itemName" placeholder="e.g. Mukimo Nyama"></div>
+      <div class="form-group"><label>Price (KES)</label><input type="number" id="itemPrice" placeholder="e.g. 150"></div>
       <div class="form-group"><label>Category</label>
         <select id="itemCategory">
           <option value="Mains">Mains</option>
-          <option value="Drinks">Drinks</option>
-          <option value="Snacks">Snacks</option>
           <option value="Breakfast">Breakfast</option>
+          <option value="Snacks">Snacks</option>
+          <option value="Drinks">Drinks</option>
         </select>
       </div>
       <div class="modal-actions">
@@ -242,40 +429,46 @@
     </div>
   </div>
 
+  <!-- Add Expense Modal -->
   <div class="modal-overlay" id="addExpenseModal">
     <div class="modal">
-      <h3>Add Expense</h3>
-      <div class="form-group"><label>Description</label><input type="text" id="expenseDesc" placeholder="e.g., Electricity bill"></div>
-      <div class="form-group"><label>Amount (KES)</label><input type="number" id="expenseAmount" placeholder="e.g., 5000"></div>
-      <div class="form-group"><label>Category</label>
+      <h3>Record Expense</h3>
+      <div class="form-group"><label>Description</label><input type="text" id="expenseDesc" placeholder="e.g. Electricity bill, Cabbages stock"></div>
+      <div class="form-group"><label>Amount (KES)</label><input type="number" id="expenseAmount" placeholder="e.g. 1500"></div>
+      <div class="form-group"><label>Expense Category</label>
         <select id="expenseCategory">
-          <option value="Supplies">Supplies</option><option value="Utilities">Utilities</option>
-          <option value="Wages">Wages</option><option value="Maintenance">Maintenance</option><option value="Other">Other</option>
+          <option value="Stock Purchase">Stock Purchase</option>
+          <option value="Utilities">Utilities</option>
+          <option value="Repairs">Repairs</option>
+          <option value="Wages">Wages</option>
+          <option value="Other">Other</option>
         </select>
       </div>
       <div class="modal-actions">
         <button class="btn-secondary" onclick="closeModal('addExpenseModal')">Cancel</button>
-        <button class="btn-primary" onclick="addExpense()">Add Expense</button>
+        <button class="btn-primary" onclick="addExpense()">Save Expense</button>
       </div>
     </div>
   </div>
 
+  <!-- Order Confirmation Modal -->
   <div class="modal-overlay" id="confirmModal">
     <div class="modal">
-      <h3>Confirm Order</h3>
+      <h3>Confirm Order & Print Receipt</h3>
       <div id="confirmItems"></div>
       <div class="confirm-total" id="confirmTotal"></div>
       <div class="confirm-payment" id="confirmPayment"></div>
       <div class="modal-actions">
-        <button class="btn-secondary" onclick="closeModal('confirmModal')">Cancel</button>
-        <button class="btn-primary" onclick="recordSale()">✓ Record Sale</button>
+        <button class="btn-secondary" onclick="closeModal('confirmModal')">Back to Cart</button>
+        <button class="btn-primary" onclick="recordSale()">✓ Confirm & Print</button>
       </div>
     </div>
   </div>
 
+  <!-- Toast Notification -->
   <div class="toast" id="toast"></div>
 
-  <!-- Firebase -->
+  <!-- Firebase CDN -->
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>

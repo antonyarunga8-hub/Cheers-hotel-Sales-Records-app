@@ -1,5 +1,6 @@
-// Generated from Firebase Console — cheers-hotel-c5f47
-// Web app: Cheers Hotel POS
+// Firebase project: cheers-hotel-bf5ce
+// Auth: Anonymous enabled
+// Firestore: Default database, test mode
 
 import 'package:firebase_core/firebase_core.dart' show FirebaseOptions;
 import 'package:flutter/foundation.dart'
@@ -10,7 +11,7 @@ class DefaultFirebaseOptions {
     if (kIsWeb) return web;
     switch (defaultTargetPlatform) {
       case TargetPlatform.windows:
-        return web; // Windows uses same config as web for Firestore
+        return web;
       case TargetPlatform.android:
         return android;
       case TargetPlatform.iOS:
@@ -20,33 +21,30 @@ class DefaultFirebaseOptions {
     }
   }
 
-  // ──── WEB ────
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyDDv8CwVxEKAkqaj5CmZkk2YglH64jd4qE',
-    authDomain: 'cheers-hotel-c5f47.firebaseapp.com',
-    projectId: 'cheers-hotel-c5f47',
-    storageBucket: 'cheers-hotel-c5f47.firebasestorage.app',
-    messagingSenderId: '379932426570',
-    appId: '1:379932426570:web:0f668aa961c30815bb01b3',
-    measurementId: 'G-QPV3VH3CKH',
+    apiKey: 'AIzaSyDDyKRMo6KbbrZwPg6YpVC-qCLp0iV5LEc',
+    authDomain: 'cheers-hotel-bf5ce.firebaseapp.com',
+    projectId: 'cheers-hotel-bf5ce',
+    storageBucket: 'cheers-hotel-bf5ce.firebasestorage.app',
+    messagingSenderId: '574024389328',
+    appId: '1:574024389328:web:b490d142f28881143204d5',
+    measurementId: 'G-224H95L4EN',
   );
 
-  // ──── ANDROID (same project, add Android app in console later) ────
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyDDv8CwVxEKAkqaj5CmZkk2YglH64jd4qE',
-    appId: '1:379932426570:web:0f668aa961c30815bb01b3',
-    messagingSenderId: '379932426570',
-    projectId: 'cheers-hotel-c5f47',
-    storageBucket: 'cheers-hotel-c5f47.firebasestorage.app',
+    apiKey: 'AIzaSyDDyKRMo6KbbrZwPg6YpVC-qCLp0iV5LEc',
+    appId: '1:574024389328:web:b490d142f28881143204d5',
+    messagingSenderId: '574024389328',
+    projectId: 'cheers-hotel-bf5ce',
+    storageBucket: 'cheers-hotel-bf5ce.firebasestorage.app',
   );
 
-  // ──── iOS (same project, add iOS app in console later) ────
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyDDv8CwVxEKAkqaj5CmZkk2YglH64jd4qE',
-    appId: '1:379932426570:web:0f668aa961c30815bb01b3',
-    messagingSenderId: '379932426570',
-    projectId: 'cheers-hotel-c5f47',
-    storageBucket: 'cheers-hotel-c5f47.firebasestorage.app',
+    apiKey: 'AIzaSyDDyKRMo6KbbrZwPg6YpVC-qCLp0iV5LEc',
+    appId: '1:574024389328:web:b490d142f28881143204d5',
+    messagingSenderId: '574024389328',
+    projectId: 'cheers-hotel-bf5ce',
+    storageBucket: 'cheers-hotel-bf5ce.firebasestorage.app',
     iosBundleId: 'com.cheershotel.app',
   );
 }

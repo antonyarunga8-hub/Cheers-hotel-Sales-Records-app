@@ -483,19 +483,20 @@ async function recordSale() {
     });
     const total = items.reduce((sum, i) => sum + i.price * i.qty, 0);
     const sourceSelect = document.getElementById('settingSource');
-    const source = sourceSelect ? sourceSelect.value : 'desktop';
+    const source = sourceSelect ? sourceSelect.value : (window.innerWidth < 768 ? 'mobile' : 'desktop');
 
-    if (typeof orderCounter !== 'number' || isNaN(orderCounter)) {
-      orderCounter = 1;
-    } else {
-      orderCounter++;
+    // Safe order number generation — never throws ReferenceError
+    if (!window.orderCounter || isNaN(window.orderCounter)) {
+      window.orderCounter = parseInt(localStorage.getItem('cheers_order_counter') || '1', 10);
     }
-    localStorage.setItem('cheers_order_counter', orderCounter.toString());
-    const orderNum = String(orderCounter).padStart(3, '0');
+    window.orderCounter++;
+    localStorage.setItem('cheers_order_counter', window.orderCounter.toString());
+
+    const orderNum = String(window.orderCounter % 1000).padStart(3, '0');
     const now = new Date();
     const dateStr = now.toLocaleDateString('en-KE') + ' ' + now.toLocaleTimeString('en-KE', { hour: '2-digit', minute: '2-digit' });
 
-    const docRef = await ordersRef.add({
+    await ordersRef.add({
       orderNumber: orderNum,
       items: items,
       total: total,
@@ -504,27 +505,31 @@ async function recordSale() {
       source: source,
       paymentMethod: paymentMethod,
       synced: true,
-      receiptPrinted: true,
+      receiptPrinted: source === 'desktop',
       kitchenStatus: 'pending'
     });
 
-    // Populate Printable Thermal Receipt
+    // Populate Printable & Thermal Receipt
     populatePrintableReceipt(orderNum, dateStr, activeStaff, items, total, paymentMethod);
 
     cart = {};
     updateCart();
     closeModal('confirmModal');
     showToast(`✅ Order #${orderNum} Recorded by ${activeStaff}! Total: KES ${total.toLocaleString()}`);
-    
-    // Trigger browser print dialog for thermal receipt printer
+
+    // Trigger device print (works on mobile AirPrint, Bluetooth printers, and Desktop thermal)
     setTimeout(() => {
-      window.print();
-    }, 400);
+      try {
+        window.print();
+      } catch (err) {
+        console.warn('Print notice:', err);
+      }
+    }, 300);
 
     loadDashboard();
   } catch (e) {
     console.error('Record sale error:', e);
-    showToast('❌ Failed to record sale: ' + e.message);
+    showToast('❌ Failed to record sale: ' + (e.message || e));
   } finally {
     btn.disabled = false;
     btn.textContent = '✓ Confirm & Print';

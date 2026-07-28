@@ -157,6 +157,13 @@
               <input type="text" id="menuSearchInput" placeholder="Search item (e.g. Chapati, Chai, Nyama)..." oninput="onSearchInput(this.value)">
               <button class="clear-search-btn" id="clearSearchBtn" onclick="clearSearch()" style="display:none;">✕</button>
             </div>
+            
+            <!-- Mobile Collapsible Category Menu Header -->
+            <button class="mobile-cat-toggle" id="mobileCatToggle" onclick="toggleMobileCategoryMenu()">
+              <span id="currentCatLabel">📂 Category: ⭐ Favorites</span>
+              <span class="toggle-icon" id="catToggleIcon">▾</span>
+            </button>
+
             <div class="category-filter" id="categoryFilter"></div>
           </div>
 

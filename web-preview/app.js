@@ -80,6 +80,7 @@ let activeStaff = localStorage.getItem('cheers_staff') || 'Cathy';
 let adminPin = localStorage.getItem('cheers_admin_pin') || '1234';
 let isAdminUnlocked = false;
 let pendingTargetTab = null;
+let orderCounter = parseInt(localStorage.getItem('cheers_order_counter') || '0', 10);
 
 // ─── Initialization ───
 document.addEventListener('DOMContentLoaded', async () => {
@@ -284,12 +285,28 @@ function renderCategoryFilter() {
       ${cat}
     </button>
   `).join('');
+
+  const catLabel = document.getElementById('currentCatLabel');
+  if (catLabel) catLabel.textContent = `📂 Category: ${activeCategory}`;
+}
+
+function toggleMobileCategoryMenu() {
+  const container = document.getElementById('categoryFilter');
+  const toggleBtn = document.getElementById('mobileCatToggle');
+  if (container) container.classList.toggle('show-mobile');
+  if (toggleBtn) toggleBtn.classList.toggle('open');
 }
 
 function setCategory(cat) {
   activeCategory = cat;
   renderCategoryFilter();
   renderMenuGrid();
+
+  // Close mobile drawer after selecting
+  const container = document.getElementById('categoryFilter');
+  const toggleBtn = document.getElementById('mobileCatToggle');
+  if (container) container.classList.remove('show-mobile');
+  if (toggleBtn) toggleBtn.classList.remove('open');
 }
 
 function onSearchInput(val) {
@@ -468,7 +485,12 @@ async function recordSale() {
     const sourceSelect = document.getElementById('settingSource');
     const source = sourceSelect ? sourceSelect.value : 'desktop';
 
-    orderCounter++;
+    if (typeof orderCounter !== 'number' || isNaN(orderCounter)) {
+      orderCounter = 1;
+    } else {
+      orderCounter++;
+    }
+    localStorage.setItem('cheers_order_counter', orderCounter.toString());
     const orderNum = String(orderCounter).padStart(3, '0');
     const now = new Date();
     const dateStr = now.toLocaleDateString('en-KE') + ' ' + now.toLocaleTimeString('en-KE', { hour: '2-digit', minute: '2-digit' });

@@ -468,7 +468,13 @@ async function recordSale() {
     const sourceSelect = document.getElementById('settingSource');
     const source = sourceSelect ? sourceSelect.value : 'desktop';
 
-    await ordersRef.add({
+    orderCounter++;
+    const orderNum = String(orderCounter).padStart(3, '0');
+    const now = new Date();
+    const dateStr = now.toLocaleDateString('en-KE') + ' ' + now.toLocaleTimeString('en-KE', { hour: '2-digit', minute: '2-digit' });
+
+    const docRef = await ordersRef.add({
+      orderNumber: orderNum,
       items: items,
       total: total,
       timestamp: firebase.firestore.FieldValue.serverTimestamp(),
@@ -477,13 +483,22 @@ async function recordSale() {
       paymentMethod: paymentMethod,
       synced: true,
       receiptPrinted: true,
-      kitchenStatus: 'pending' // for Kitchen Display System
+      kitchenStatus: 'pending'
     });
+
+    // Populate Printable Thermal Receipt
+    populatePrintableReceipt(orderNum, dateStr, activeStaff, items, total, paymentMethod);
 
     cart = {};
     updateCart();
     closeModal('confirmModal');
-    showToast(`✅ Order Recorded by ${activeStaff}! Total: KES ${total.toLocaleString()}`);
+    showToast(`✅ Order #${orderNum} Recorded by ${activeStaff}! Total: KES ${total.toLocaleString()}`);
+    
+    // Trigger browser print dialog for thermal receipt printer
+    setTimeout(() => {
+      window.print();
+    }, 400);
+
     loadDashboard();
   } catch (e) {
     console.error('Record sale error:', e);
@@ -491,6 +506,45 @@ async function recordSale() {
   } finally {
     btn.disabled = false;
     btn.textContent = '✓ Confirm & Print';
+  }
+}
+
+function populatePrintableReceipt(orderNum, dateStr, staff, items, total, payment) {
+  document.getElementById('receiptOrderNum').textContent = `ORDER #${orderNum}`;
+  document.getElementById('receiptDateTime').textContent = `Date: ${dateStr}`;
+  document.getElementById('receiptStaff').textContent = `Staff: ${staff}`;
+  
+  const footerInput = document.getElementById('settingFooter');
+  const footerText = footerInput ? footerInput.value : 'Thank you for dining with us! Cheers Hotel Nairobi';
+  document.getElementById('receiptFooterMsg').innerHTML = footerText.replace('\n', '<br>');
+
+  const itemsContainer = document.getElementById('receiptItemsBody');
+  itemsContainer.innerHTML = items.map(i => {
+    const lineTotal = i.price * i.qty;
+    return `
+      <div class="receipt-item-row">
+        <span>${i.qty}x ${i.name}</span>
+        <span>KES ${lineTotal.toLocaleString()}</span>
+      </div>`;
+  }).join('');
+
+  document.getElementById('receiptTotalLine').textContent = `TOTAL: KES ${total.toLocaleString()}`;
+  document.getElementById('receiptPaymentType').textContent = `PAID VIA ${payment.toUpperCase()}`;
+}
+
+async function printReceiptReprint(orderId) {
+  try {
+    const doc = await ordersRef.doc(orderId).get();
+    if (!doc.exists) return;
+    const o = doc.data();
+    const orderNum = o.orderNumber || orderId.substring(0, 5).toUpperCase();
+    const timeStr = o.timestamp?.toDate ? o.timestamp.toDate().toLocaleString('en-KE') : new Date().toLocaleString('en-KE');
+
+    populatePrintableReceipt(orderNum, timeStr, o.recordedBy || 'Staff', o.items || [], o.total || 0, o.paymentMethod || 'cash');
+    showToast(`🧾 Printing receipt for Order #${orderNum}...`);
+    setTimeout(() => window.print(), 300);
+  } catch (e) {
+    showToast('❌ Error re-printing receipt');
   }
 }
 

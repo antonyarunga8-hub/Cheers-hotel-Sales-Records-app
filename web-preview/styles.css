@@ -611,6 +611,35 @@ body {
 }
 .toast.show { transform: translateX(-50%) translateY(0); }
 
+/* ─── THERMAL RECEIPT PRINT STYLES (Xprinter XP-Q80A 80mm) ─── */
+.printable-receipt { display: none; }
+
+@media print {
+  body * { visibility: hidden !important; }
+  .printable-receipt, .printable-receipt * { visibility: visible !important; }
+  .printable-receipt {
+    display: block !important;
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 76mm !important; /* Standard 80mm width printable area */
+    padding: 2mm !important;
+    font-family: 'Courier New', Courier, monospace !important;
+    font-size: 12px !important;
+    color: #000000 !important;
+    background: #ffffff !important;
+  }
+  .receipt-header { text-align: center; margin-bottom: 4px; }
+  .receipt-logo-block { display: flex; justify-content: center; margin-bottom: 6px; }
+  .receipt-hotel-name { font-size: 16px; font-weight: bold; letter-spacing: 1px; }
+  .receipt-sub { font-size: 11px; margin-top: 2px; }
+  .receipt-divider { font-weight: bold; margin: 4px 0; text-align: center; overflow: hidden; }
+  .receipt-item-row { display: flex; justify-content: space-between; font-size: 12px; margin: 3px 0; }
+  .receipt-total-line { font-size: 15px; font-weight: bold; text-align: right; margin: 6px 0; }
+  .receipt-payment-type { font-size: 12px; font-weight: bold; text-align: center; margin-top: 4px; }
+  .receipt-footer-msg { text-align: center; font-size: 11px; margin-top: 8px; font-style: italic; }
+}
+
 /* ─── RESPONSIVE ─── */
 @media (max-width: 960px) {
   .analytics-row { grid-template-columns: 1fr; }

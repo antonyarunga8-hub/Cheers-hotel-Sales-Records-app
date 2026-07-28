@@ -12,10 +12,16 @@
   <!-- Sidebar Navigation -->
   <nav class="sidebar">
     <div class="sidebar-brand">
-      <div class="brand-icon">C<span>H</span></div>
+      <div class="brand-logo-img">
+        <svg width="40" height="40" viewBox="0 0 100 100" fill="none">
+          <rect width="100" height="100" rx="20" fill="rgba(255,255,255,0.18)"/>
+          <text x="20" y="55" font-family="'Georgia', serif" font-size="52" font-weight="bold" fill="#ffffff">C</text>
+          <text x="36" y="78" font-family="'Georgia', serif" font-size="44" font-weight="bold" fill="#fca5a5">H</text>
+        </svg>
+      </div>
       <div class="brand-titles">
-        <span class="brand-name">Cheers Hotel</span>
-        <span class="brand-sub">POS & Management</span>
+        <span class="brand-name">CHEERS HOTEL</span>
+        <span class="brand-sub">Sales & POS System</span>
       </div>
     </div>
     
@@ -462,6 +468,36 @@
         <button class="btn-secondary" onclick="closeModal('confirmModal')">Back to Cart</button>
         <button class="btn-primary" onclick="recordSale()">✓ Confirm & Print</button>
       </div>
+    </div>
+  </div>
+
+  <!-- Thermal 80mm Printable Receipt (Hidden during normal view, visible when printing) -->
+  <div class="printable-receipt" id="printableReceipt">
+    <div class="receipt-header">
+      <!-- Official Logo Representation -->
+      <div class="receipt-logo-block">
+        <svg width="120" height="50" viewBox="0 0 240 100">
+          <text x="10" y="70" font-family="'Georgia', 'Times New Roman', serif" font-size="80" font-weight="bold" fill="#000000">C</text>
+          <text x="45" y="95" font-family="'Georgia', 'Times New Roman', serif" font-size="65" font-weight="bold" fill="#000000">H</text>
+          <text x="105" y="55" font-family="'Arial Black', sans-serif" font-size="34" font-weight="900" fill="#000000">EERS</text>
+          <text x="110" y="92" font-family="'Arial Black', sans-serif" font-size="34" font-weight="900" fill="#000000">OTEL</text>
+        </svg>
+      </div>
+      <div class="receipt-hotel-name">CHEERS HOTEL</div>
+      <div class="receipt-sub">Nairobi, Kenya</div>
+      <div class="receipt-sub" id="receiptOrderNum">ORDER #000</div>
+      <div class="receipt-sub" id="receiptDateTime">Date: --/--/----</div>
+      <div class="receipt-sub" id="receiptStaff">Staff: Cathy</div>
+    </div>
+    <div class="receipt-divider">================================</div>
+    <div class="receipt-items-list" id="receiptItemsBody"></div>
+    <div class="receipt-divider">================================</div>
+    <div class="receipt-total-line" id="receiptTotalLine">TOTAL: KES 0</div>
+    <div class="receipt-payment-type" id="receiptPaymentType">PAID VIA CASH</div>
+    <div class="receipt-divider">================================</div>
+    <div class="receipt-footer-msg" id="receiptFooterMsg">
+      Thank you for dining with us!<br>
+      Please visit again.
     </div>
   </div>
 

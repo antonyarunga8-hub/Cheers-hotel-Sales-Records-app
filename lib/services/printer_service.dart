@@ -91,7 +91,7 @@ class WindowsEscPosPrinterService implements PrinterService {
       '\x1B\x45\x00',       // Bold off
       '\n',
       'Thank you for dining with us!',
-      'Cheers Hotel — Nairobi',
+      'Cheers Hotel — Vihiga, Mbale',
       '\n\n\n',
       '\x1D\x56\x00',       // Full cut
     ]);

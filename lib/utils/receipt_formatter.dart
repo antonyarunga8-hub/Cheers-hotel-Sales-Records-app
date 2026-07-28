@@ -54,7 +54,7 @@ class ReceiptFormatter {
     buf.writeln();
     const thanks = 'Thank you for dining with us!';
     buf.writeln(thanks.padLeft((width + thanks.length) ~/ 2));
-    const footer = 'Cheers Hotel — Nairobi';
+    const footer = 'Cheers Hotel — Vihiga, Mbale';
     buf.writeln(footer.padLeft((width + footer.length) ~/ 2));
 
     return buf.toString();

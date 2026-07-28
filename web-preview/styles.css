@@ -152,6 +152,19 @@ body {
   font-weight: 700;
   border: 1px solid #fca5a5;
 }
+.logout-btn {
+  background: #fff5f5;
+  color: var(--danger);
+  border: 1px solid #fca5a5;
+  padding: 4px 10px;
+  border-radius: 16px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  transition: var(--transition);
+}
+.logout-btn:hover { background: #fee2e2; }
 .top-bar-right { display: flex; align-items: center; gap: 12px; }
 .quick-stats-pill {
   background: #f3f4f6;

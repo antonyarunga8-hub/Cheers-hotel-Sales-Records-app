@@ -60,9 +60,9 @@
         <span>Transactions</span>
       </button>
 
-      <button class="nav-btn" data-tab="menu" onclick="switchTab('menu')">
+      <button class="nav-btn" data-tab="menu" onclick="requestAdminAuth('menu')">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 002-2V2"/><path d="M7 2v20"/><path d="M21 15V2a5 5 0 00-5 5v6c0 1.1.9 2 2 2h3zm0 0v7"/></svg>
-        <span>Menu Management</span>
+        <span>Menu Management 🔒</span>
       </button>
 
       <button class="nav-btn" data-tab="analytics" onclick="requestAdminAuth('analytics')">
@@ -95,6 +95,7 @@
       <div class="top-title-area">
         <h1 id="pageTitle">Dashboard</h1>
         <span class="active-staff-badge" id="activeStaffBadge">Staff: Cathy</span>
+        <button class="logout-btn" onclick="openStaffLogoutModal()" title="Log out staff shift">🚪 Logout</button>
       </div>
       <div class="top-bar-right">
         <div class="quick-stats-pill" id="quickSalesPill">Today: KES 0</div>
@@ -326,7 +327,7 @@
           </div>
           <div class="settings-row">
             <label>Receipt Footer Message</label>
-            <input type="text" id="settingFooter" value="Thank you for dining with us! Cheers Hotel Nairobi">
+            <input type="text" id="settingFooter" value="Thank you for dining with us! Cheers Hotel, Vihiga, Mbale">
           </div>
           <div class="settings-row">
             <label>Order Source Mode</label>
@@ -385,13 +386,25 @@
   <div class="modal-overlay" id="adminAuthModal">
     <div class="modal">
       <h3>🔒 Admin Passcode Required</h3>
-      <p style="color:#6b7280;margin-bottom:16px;font-size:14px;">Enter Admin PIN to view Sales Analytics.</p>
+      <p style="color:#6b7280;margin-bottom:16px;font-size:14px;">Enter Admin PIN to access protected management features.</p>
       <div class="form-group">
         <input type="password" id="adminPinInput" placeholder="Enter PIN (Default: 1234)" autofocus>
       </div>
       <div class="modal-actions">
         <button class="btn-secondary" onclick="closeModal('adminAuthModal')">Cancel</button>
-        <button class="btn-primary" onclick="verifyAdminPin()">Unlock Analytics</button>
+        <button class="btn-primary" onclick="verifyAdminPin()">Unlock Access</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Staff Logout Modal -->
+  <div class="modal-overlay" id="staffLogoutModal">
+    <div class="modal">
+      <h3>🚪 End Staff Shift / Logout</h3>
+      <p style="color:#6b7280;margin-bottom:16px;font-size:14px;">Are you sure you want to end shift for <strong id="logoutStaffName">Cathy</strong>?</p>
+      <div class="modal-actions">
+        <button class="btn-secondary" onclick="closeModal('staffLogoutModal')">Cancel</button>
+        <button class="btn-primary danger" onclick="confirmStaffLogout()">End Shift & Logout</button>
       </div>
     </div>
   </div>
@@ -491,7 +504,7 @@
         </svg>
       </div>
       <div class="receipt-hotel-name">CHEERS HOTEL</div>
-      <div class="receipt-sub">Nairobi, Kenya</div>
+      <div class="receipt-sub">Vihiga, Mbale</div>
       <div class="receipt-sub" id="receiptOrderNum">ORDER #000</div>
       <div class="receipt-sub" id="receiptDateTime">Date: --/--/----</div>
       <div class="receipt-sub" id="receiptStaff">Staff: Cathy</div>
@@ -515,6 +528,6 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
-  <script src="app.js?v=1.0.2"></script>
+  <script src="app.js?v=1.0.3"></script>
 </body>
 </html>

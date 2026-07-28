@@ -35,4 +35,4 @@ lib/
 ```
 
 ## License
-Private — Cheers Hotel, Nairobi.
+Private — Cheers Hotel, Vihiga, Mbale.

@@ -155,8 +155,10 @@ function requestAdminAuth(targetTab) {
     return;
   }
   pendingTargetTab = targetTab;
-  document.getElementById('adminPinInput').value = '';
-  document.getElementById('adminAuthModal').classList.add('show');
+  const pinInput = document.getElementById('adminPinInput');
+  if (pinInput) pinInput.value = '';
+  const modal = document.getElementById('adminAuthModal');
+  if (modal) modal.classList.add('show');
 }
 
 function verifyAdminPin() {
@@ -171,11 +173,26 @@ function verifyAdminPin() {
   }
 }
 
+// ─── Staff Shift Logout ───
+function openStaffLogoutModal() {
+  const nameEl = document.getElementById('logoutStaffName');
+  if (nameEl) nameEl.textContent = activeStaff;
+  const modal = document.getElementById('staffLogoutModal');
+  if (modal) modal.classList.add('show');
+}
+
+function confirmStaffLogout() {
+  closeModal('staffLogoutModal');
+  showToast(`🚪 Shift ended for ${activeStaff}. Please select staff member for next shift.`);
+  const staffSelect = document.getElementById('activeStaff');
+  if (staffSelect) staffSelect.focus();
+}
+
 // ─── Navigation ───
 function switchTab(tab) {
-  // If requesting analytics without admin lock
-  if (tab === 'analytics' && !isAdminUnlocked) {
-    requestAdminAuth('analytics');
+  // If requesting analytics or menu management without admin lock
+  if ((tab === 'analytics' || tab === 'menu') && !isAdminUnlocked) {
+    requestAdminAuth(tab);
     return;
   }
 
@@ -542,7 +559,7 @@ function populatePrintableReceipt(orderNum, dateStr, staff, items, total, paymen
   document.getElementById('receiptStaff').textContent = `Staff: ${staff}`;
   
   const footerInput = document.getElementById('settingFooter');
-  const footerText = footerInput ? footerInput.value : 'Thank you for dining with us! Cheers Hotel Nairobi';
+  const footerText = footerInput ? footerInput.value : 'Thank you for dining with us! Cheers Hotel, Vihiga, Mbale';
   document.getElementById('receiptFooterMsg').innerHTML = footerText.replace('\n', '<br>');
 
   const itemsContainer = document.getElementById('receiptItemsBody');

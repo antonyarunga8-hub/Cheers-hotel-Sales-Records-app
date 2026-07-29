@@ -34,6 +34,7 @@ const DEDUPLICATED_STOCK_MENU = [
   { name: 'MANDAZI', price: 10, category: 'Breakfast', popular: true },
 
   // Mains
+  { name: 'UGALI PLAIN', price: 40, category: 'Mains', popular: true },
   { name: 'UGALI MLIMA', price: 150, category: 'Mains' },
   { name: 'NYAMA STEW', price: 120, category: 'Mains' },
   { name: 'NYAMA FRY', price: 150, category: 'Mains' },
@@ -119,18 +120,89 @@ document.addEventListener('DOMContentLoaded', async () => {
   window.addEventListener('offline', updateNetworkStatus);
   updateNetworkStatus();
 
+  // Restore App Theme (Light / Dark)
+  initAppTheme();
+
   // Check Cookie / Storage Auth Session
   checkAuthSession();
 
-  // Listeners
+  // Realtime Listeners
   watchMenu();
   loadDashboard();
   watchKitchenOrders();
+  watchAutoPrintQueue();
 
   // Default date filter for transactions
   const dateInput = document.getElementById('txnDateFilter');
   if (dateInput) dateInput.value = new Date().toISOString().split('T')[0];
 });
+
+// ─── Light / Dark Mode Theme System ───
+function initAppTheme() {
+  const savedTheme = localStorage.getItem('cheers_theme') || 'light';
+  document.documentElement.setAttribute('data-theme', savedTheme);
+  const btn = document.getElementById('themeToggleBtn');
+  if (btn) btn.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+}
+
+function toggleAppTheme() {
+  const current = document.documentElement.getAttribute('data-theme') || 'light';
+  const next = current === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', next);
+  localStorage.setItem('cheers_theme', next);
+  const btn = document.getElementById('themeToggleBtn');
+  if (btn) btn.textContent = next === 'dark' ? '☀️' : '🌙';
+  showToast(next === 'dark' ? '🌙 Dark Mode Activated' : '☀️ Light Mode Activated');
+}
+
+// ─── Real-Time Phone Orders Auto-Print Engine ───
+let isAutoPrintEnabled = localStorage.getItem('cheers_autoprint') !== 'disabled';
+let processedPrintOrderIds = new Set();
+
+function toggleAutoPrintSetting(val) {
+  isAutoPrintEnabled = (val === 'enabled');
+  localStorage.setItem('cheers_autoprint', isAutoPrintEnabled ? 'enabled' : 'disabled');
+  const el = document.getElementById('autoPrintStatus');
+  if (el) el.textContent = isAutoPrintEnabled ? 'Active ⚡' : 'Disabled ⏸️';
+  showToast(isAutoPrintEnabled ? '⚡ Real-Time Phone Orders Auto-Print ENABLED' : '⏸️ Auto-Print DISABLED');
+}
+
+function watchAutoPrintQueue() {
+  // Only desktop till mode automatically prints incoming phone orders
+  ordersRef.onSnapshot(snap => {
+    snap.docChanges().forEach(change => {
+      if (change.type === 'added') {
+        const orderId = change.doc.id;
+        const data = change.doc.data();
+
+        // Check if phone order requires printing & auto-print is enabled
+        const isPhoneOrder = data.source === 'mobile' || data.receiptPrinted === false;
+        if (isPhoneOrder && !data.receiptPrinted && !processedPrintOrderIds.has(orderId)) {
+          processedPrintOrderIds.add(orderId);
+
+          const autoPrintSelect = document.getElementById('settingAutoPrint');
+          const isEnabled = autoPrintSelect ? autoPrintSelect.value === 'enabled' : isAutoPrintEnabled;
+
+          if (isEnabled) {
+            // Trigger automatic printing on the connected desktop printer!
+            console.log('⚡ Incoming phone order detected! Auto-printing receipt:', orderId);
+            const dateStr = data.timestamp ? new Date(data.timestamp.seconds * 1000).toLocaleString('en-KE') : new Date().toLocaleString('en-KE');
+            populatePrintableReceipt(data.orderNumber, dateStr, data.recordedBy, data.items, data.total, data.paymentMethod);
+            
+            // Mark document as printed in Firestore
+            ordersRef.doc(orderId).update({ receiptPrinted: true }).catch(err => console.warn(err));
+
+            showToast(`⚡ Incoming Phone Order #${data.orderNumber} Auto-Printed!`);
+            
+            setTimeout(() => {
+              try { window.print(); } catch(e) { console.warn('Auto print trigger error:', e); }
+            }, 300);
+          }
+        }
+      }
+    });
+  });
+}
 
 function checkAuthSession() {
   const sessionCookie = getCookie('cheers_auth_session') || localStorage.getItem('cheers_auth_session');
@@ -1230,13 +1302,25 @@ function saveAdminSettings() {
 }
 
 async function clearAllOrders() {
-  if (confirm('Clear all orders? This action cannot be undone.')) {
-    const snap = await ordersRef.get();
-    const batch = db.batch();
-    snap.forEach(doc => batch.delete(doc.ref));
-    await batch.commit();
-    showToast('🧹 All orders cleared!');
-    loadDashboard();
+  if (confirm('⚠️ Are you sure you want to clear ALL feeded transactions and order data? This action cannot be undone.')) {
+    try {
+      showToast('🧹 Clearing all feeded transactions...');
+      const snap = await ordersRef.get();
+      const batch = db.batch();
+      snap.forEach(doc => batch.delete(doc.ref));
+      await batch.commit();
+
+      // Reset order counter
+      orderCounter = 0;
+      window.orderCounter = 0;
+      localStorage.setItem('cheers_order_counter', '0');
+
+      showToast('🧹 All feeded transactions and order records cleared cleanly!');
+      loadDashboard();
+      loadTransactions();
+    } catch (e) {
+      showToast('❌ Error clearing orders: ' + e.message);
+    }
   }
 }
 

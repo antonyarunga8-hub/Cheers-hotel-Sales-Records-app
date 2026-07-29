@@ -160,6 +160,7 @@
       <div class="top-bar-right">
         <div class="quick-stats-pill" id="quickSalesPill">Today: KES 0</div>
         <span class="time" id="clock">--:--</span>
+        <button class="theme-toggle-btn" id="themeToggleBtn" onclick="toggleAppTheme()" title="Toggle Light/Dark Theme">🌙</button>
       </div>
     </header>
 
@@ -400,8 +401,15 @@
           <div class="settings-row">
             <label>Order Source Mode</label>
             <select id="settingSource">
-              <option value="desktop" selected>Desktop Till</option>
-              <option value="mobile">Mobile Waiter</option>
+              <option value="desktop" selected>Desktop Till (Auto-Print Hub)</option>
+              <option value="mobile">Mobile Waiter Phone</option>
+            </select>
+          </div>
+          <div class="settings-row">
+            <label>Auto-Print Phone Orders</label>
+            <select id="settingAutoPrint" onchange="toggleAutoPrintSetting(this.value)">
+              <option value="enabled" selected>⚡ Enabled (Auto-Print Phone Orders in Realtime)</option>
+              <option value="disabled">Disabled (Manual Print Only)</option>
             </select>
           </div>
           <button class="btn-primary" onclick="saveAdminSettings()">Save Admin Config</button>
@@ -427,7 +435,7 @@
             <div class="info-item"><span class="info-label">Print Speed</span><span class="info-value">230mm/s</span></div>
             <div class="info-item"><span class="info-label">Paper Width</span><span class="info-value">80mm Thermal</span></div>
             <div class="info-item"><span class="info-label">Firmware</span><span class="info-value">3.012PR6Y</span></div>
-            <div class="info-item"><span class="info-label">Status</span><span class="info-value">Ready / Auto-Cut</span></div>
+            <div class="info-item"><span class="info-label">Auto-Print Queue</span><span class="info-value" id="autoPrintStatus">Active ⚡</span></div>
           </div>
         </div>
 
@@ -437,11 +445,11 @@
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
             <h3>Database & System Maintenance</h3>
           </div>
-          <p class="settings-desc">Manage stock items, deduplicate list, or clear test transactions.</p>
+          <p class="settings-desc">Manage stock items, deduplicate list, or clear test transactions/feeded data.</p>
           <div class="settings-actions">
             <button class="btn-secondary" onclick="cleanAndDeduplicateMenu()">✨ Clean & Deduplicate Menu</button>
             <button class="btn-secondary" onclick="seedMenu()">🔄 Reset Menu from Stock Sheet</button>
-            <button class="btn-secondary danger" onclick="clearAllOrders()">🗑️ Clear All Orders</button>
+            <button class="btn-secondary danger" onclick="clearAllOrders()">🗑️ Clear All Feeded Data & Transactions</button>
           </div>
         </div>
       </div>
@@ -636,6 +644,6 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
-  <script src="app.js?v=1.0.5"></script>
+  <script src="app.js?v=1.0.6"></script>
 </body>
 </html>

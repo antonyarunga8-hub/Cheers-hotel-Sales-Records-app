@@ -9,8 +9,11 @@
   <link rel="stylesheet" href="styles.css?v=1.0.2">
 </head>
 <body>
+  <!-- Sidebar Overlay Backdrop for Mobile -->
+  <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebarMenu()"></div>
+
   <!-- Sidebar Navigation -->
-  <nav class="sidebar">
+  <nav class="sidebar" id="appSidebar">
     <div class="sidebar-brand">
       <div class="brand-logo-img">
         <svg width="40" height="40" viewBox="0 0 100 100" fill="none">
@@ -23,6 +26,7 @@
         <span class="brand-name">CHEERS HOTEL</span>
         <span class="brand-sub">Sales & POS System</span>
       </div>
+      <button class="sidebar-close-btn" onclick="closeSidebarMenu()">✕</button>
     </div>
     
     <!-- Staff Selector -->
@@ -93,6 +97,9 @@
   <main class="main-content">
     <header class="top-bar">
       <div class="top-title-area">
+        <button class="sidebar-menu-btn" onclick="toggleSidebarMenu()" title="Toggle Menu Navigation">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
         <h1 id="pageTitle">Dashboard</h1>
         <span class="active-staff-badge" id="activeStaffBadge">Staff: Cathy</span>
         <button class="logout-btn" onclick="openStaffLogoutModal()" title="Log out staff shift">🚪 Logout</button>
@@ -521,6 +528,47 @@
     </div>
   </div>
 
+  <!-- AI Assistant Chat Floating Button -->
+  <button class="ai-chat-fab" onclick="toggleAiChat()" title="Ask Cheers AI Assistant">
+    <span class="fab-icon">🤖</span>
+    <span class="fab-label">AI Helper</span>
+  </button>
+
+  <!-- AI Assistant Chat Modal Drawer -->
+  <div class="ai-chat-drawer" id="aiChatDrawer">
+    <div class="ai-chat-header">
+      <div class="ai-chat-title">
+        <span class="ai-avatar">🤖</span>
+        <div>
+          <h3>Cheers AI Assistant</h3>
+          <span class="ai-status">Online • Ready to help</span>
+        </div>
+      </div>
+      <button class="ai-close-btn" onclick="toggleAiChat()">✕</button>
+    </div>
+
+    <!-- FAQ Quick Chip Suggestions -->
+    <div class="ai-faq-chips">
+      <button onclick="askFaq('How do I record a sale and print receipt?')">🧾 How to print?</button>
+      <button onclick="askFaq('What is the printer IP & MAC address?')">🖨️ Printer Config</button>
+      <button onclick="askFaq('Where is Cheers Hotel located?')">📍 Hotel Location</button>
+      <button onclick="askFaq('What is the Admin PIN?')">🔒 Admin PIN</button>
+      <button onclick="askFaq('How do I add a new menu item?')">➕ Add Menu Item</button>
+      <button onclick="askFaq('How do staff shifts work?')">👤 Staff Shifts</button>
+    </div>
+
+    <div class="ai-chat-body" id="aiChatBody">
+      <div class="ai-msg bot">
+        👋 Hi! I am the <strong>Cheers Hotel AI Assistant</strong>. Ask me anything about taking orders, thermal printing, staff shifts, menu management, or system settings!
+      </div>
+    </div>
+
+    <div class="ai-chat-footer">
+      <input type="text" id="aiChatInput" placeholder="Type a question (e.g. printer IP, how to print)..." onkeydown="if(event.key==='Enter') sendAiMessage()">
+      <button class="ai-send-btn" onclick="sendAiMessage()">Send</button>
+    </div>
+  </div>
+
   <!-- Toast Notification -->
   <div class="toast" id="toast"></div>
 
@@ -528,6 +576,6 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
-  <script src="app.js?v=1.0.3"></script>
+  <script src="app.js?v=1.0.4"></script>
 </body>
 </html>

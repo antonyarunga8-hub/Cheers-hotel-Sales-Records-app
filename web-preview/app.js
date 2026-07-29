@@ -1144,3 +1144,109 @@ document.querySelectorAll('.modal-overlay').forEach(overlay => {
     if (e.target === overlay) overlay.classList.remove('show');
   });
 });
+
+// ─── Collapsible Maroon Sidebar Drawer Handlers ───
+function toggleSidebarMenu() {
+  const sidebar = document.getElementById('appSidebar');
+  const overlay = document.getElementById('sidebarOverlay');
+  if (sidebar) sidebar.classList.toggle('open');
+  if (overlay) overlay.classList.toggle('show');
+}
+
+function closeSidebarMenu() {
+  const sidebar = document.getElementById('appSidebar');
+  const overlay = document.getElementById('sidebarOverlay');
+  if (sidebar) sidebar.classList.remove('open');
+  if (overlay) overlay.classList.remove('show');
+}
+
+// Auto-close mobile sidebar when clicking a navigation link
+const originalSwitchTab = switchTab;
+switchTab = function(tab) {
+  closeSidebarMenu();
+  originalSwitchTab(tab);
+};
+
+// ─── AI ASSISTANT CHATBOT ENGINE ───
+function toggleAiChat() {
+  const drawer = document.getElementById('aiChatDrawer');
+  if (drawer) drawer.classList.toggle('open');
+}
+
+function askFaq(questionText) {
+  const input = document.getElementById('aiChatInput');
+  if (input) {
+    input.value = questionText;
+    sendAiMessage();
+  }
+}
+
+function sendAiMessage() {
+  const input = document.getElementById('aiChatInput');
+  const body = document.getElementById('aiChatBody');
+  if (!input || !body) return;
+
+  const query = input.value.trim();
+  if (!query) return;
+
+  // Append User Message
+  const userMsgEl = document.createElement('div');
+  userMsgEl.className = 'ai-msg user';
+  userMsgEl.textContent = query;
+  body.appendChild(userMsgEl);
+
+  input.value = '';
+  body.scrollTop = body.scrollHeight;
+
+  // Generate AI Response
+  setTimeout(() => {
+    const reply = getAiResponse(query);
+    const botMsgEl = document.createElement('div');
+    botMsgEl.className = 'ai-msg bot';
+    botMsgEl.innerHTML = reply;
+    body.appendChild(botMsgEl);
+    body.scrollTop = body.scrollHeight;
+  }, 400);
+}
+
+function getAiResponse(query) {
+  const q = query.toLowerCase();
+
+  if (q.includes('print') || q.includes('receipt') || q.includes('thermal')) {
+    return '🧾 <strong>How to Print Receipts:</strong><br>1. Tap items to add to cart on the Order screen.<br>2. Tap <strong>✓ Confirm & Print</strong>.<br>3. The browser print window opens formatted for your 80mm <strong>Xprinter XP-Q80A</strong> with the official Cheers Hotel logo header!<br>4. You can also re-print any past receipt under <strong>Transactions</strong>.';
+  }
+
+  if (q.includes('ip') || q.includes('printer') || q.includes('hardware') || q.includes('mac')) {
+    return '🖨️ <strong>Xprinter XP-Q80A Specs:</strong><br>• <strong>IP Address:</strong> 192.168.123.100:9100<br>• <strong>MAC:</strong> 00-79-31-86-78-F4<br>• <strong>Gateway:</strong> 192.168.123.1<br>• <strong>Subnet:</strong> 255.255.255.0<br>• <strong>Speed:</strong> 230mm/s thermal auto-cut.';
+  }
+
+  if (q.includes('location') || q.includes('where') || q.includes('address') || q.includes('vihiga') || q.includes('mbale')) {
+    return '📍 <strong>Hotel Location:</strong><br>Cheers Hotel is located in <strong>Vihiga, Mbale, Kenya</strong>.';
+  }
+
+  if (q.includes('pin') || q.includes('admin') || q.includes('lock') || q.includes('passcode')) {
+    return '🔒 <strong>Admin PIN & Security:</strong><br>The default Admin PIN is <strong>1234</strong>. It locks <strong>Menu Management</strong> and <strong>Sales Analytics</strong> to prevent unauthorized price changes. You can update the PIN in Settings.';
+  }
+
+  if (q.includes('menu') || q.includes('item') || q.includes('add') || q.includes('price') || q.includes('stock')) {
+    return '➕ <strong>Menu Management:</strong><br>1. Tap <strong>Menu Management 🔒</strong> in sidebar (Enter PIN: 1234).<br>2. Tap <strong>+ Add Item</strong> or <strong>✏️ Edit</strong> to change prices.<br>3. Toggle <strong>In Stock / Out of Stock</strong> to mark items unavailable.';
+  }
+
+  if (q.includes('staff') || q.includes('shift') || q.includes('cathy') || q.includes('logout') || q.includes('who')) {
+    return '👤 <strong>Staff Shift System:</strong><br>Select operating staff (Cathy, Aggy, Evelyne, Wendy, Caro) in the sidebar. Tap <strong>🚪 Logout</strong> in the top header to end shift for reconciliation.';
+  }
+
+  if (q.includes('kitchen') || q.includes('kds') || q.includes('prep') || q.includes('food')) {
+    return '🍳 <strong>Kitchen Display System (KDS):</strong><br>Open the <strong>Kitchen Display</strong> tab. Orders appear in real time for kitchen staff to tap <strong>🍳 Start Prep</strong> and <strong>✅ Mark Complete</strong>.';
+  }
+
+  if (q.includes('expense') || q.includes('cost') || q.includes('utilities') || q.includes('wage')) {
+    return '💸 <strong>Expense Tracking:</strong><br>Open <strong>Expenses</strong> tab → tap <strong>+ Add Expense</strong> → choose category (Stock Purchase, Utilities, Repairs, Wages, Other).';
+  }
+
+  if (q.includes('hi') || q.includes('hello') || q.includes('help')) {
+    return '👋 Hello! I am your <strong>Cheers POS AI Assistant</strong>. Ask me anything about taking orders, thermal printing, staff shifts, menu pricing, or system settings!';
+  }
+
+  return '💡 <strong>Cheers POS Tip:</strong><br>You can ask me about thermal printing, printer IP (192.168.123.100), location (Vihiga Mbale), staff shift logouts, admin PIN (1234), or menu editing!';
+}

@@ -485,7 +485,43 @@
     </div>
   </div>
 
-  <!-- Edit Item Modal -->
+  <!-- Edit Transaction Modal (Admin Only) -->
+  <div class="modal-overlay" id="editTxnModal">
+    <div class="modal">
+      <h3>✏️ Edit Transaction <span id="editTxnNumTitle">#000</span></h3>
+      <input type="hidden" id="editTxnDocId">
+      <div class="form-group">
+        <label>Payment Status</label>
+        <select id="editTxnStatus" onchange="onEditTxnStatusChange(this.value)">
+          <option value="paid">✅ Paid</option>
+          <option value="unpaid">⏳ Unpaid Credit Tab</option>
+        </select>
+      </div>
+      <div class="form-group" id="editTxnMethodGroup">
+        <label>Payment Method</label>
+        <select id="editTxnMethod">
+          <option value="cash">💵 Cash</option>
+          <option value="mpesa">📱 M-Pesa</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Total Amount (KES)</label>
+        <input type="number" id="editTxnTotal" min="0" step="1">
+      </div>
+      <div class="form-group">
+        <label>Reason for Edit / Audit Notes</label>
+        <input type="text" id="editTxnReason" placeholder="e.g. Price adjustment, wrong payment method select">
+      </div>
+      <div class="audit-history-box" id="editTxnAuditBox" style="display:none;margin-top:12px;padding:10px;background:var(--bg);border-radius:8px;font-size:12px;">
+        <strong>📜 Previous Edit History:</strong>
+        <div id="editTxnAuditList" style="margin-top:6px;max-height:100px;overflow-y:auto;"></div>
+      </div>
+      <div class="modal-actions" style="margin-top:18px;">
+        <button class="btn-secondary" onclick="closeModal('editTxnModal')">Cancel</button>
+        <button class="btn-primary" onclick="saveEditedTransaction()">💾 Save Transaction Edit</button>
+      </div>
+    </div>
+  </div>
   <div class="modal-overlay" id="editItemModal">
     <div class="modal">
       <h3>Edit Menu Item</h3>
@@ -644,6 +680,6 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
-  <script src="app.js?v=1.0.7"></script>
+  <script src="app.js?v=1.0.8"></script>
 </body>
 </html>

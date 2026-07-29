@@ -30,6 +30,68 @@
   --shadow: 0 1px 3px rgba(0,0,0,0.4);
 }
 
+[data-theme="dark"] .quick-stats-pill {
+  background: #334155 !important;
+  color: #f8fafc !important;
+  border-color: #475569 !important;
+}
+
+[data-theme="dark"] .time {
+  background: #1e293b !important;
+  color: #cbd5e1 !important;
+  border-color: #334155 !important;
+}
+
+[data-theme="dark"] .kds-card {
+  background: #1e293b !important;
+  color: #f8fafc !important;
+  border-color: #334155 !important;
+}
+
+[data-theme="dark"] .kds-item {
+  color: #cbd5e1 !important;
+}
+
+[data-theme="dark"] .txn-table {
+  background: #1e293b !important;
+  color: #f8fafc !important;
+}
+
+[data-theme="dark"] .txn-table th {
+  background: #0f172a !important;
+  color: #94a3b8 !important;
+  border-bottom-color: #334155 !important;
+}
+
+[data-theme="dark"] .txn-table td {
+  border-bottom-color: #334155 !important;
+}
+
+[data-theme="dark"] .modal, [data-theme="dark"] .login-card {
+  background: #1e293b !important;
+  color: #f8fafc !important;
+}
+
+/* Transaction Audit Trail Badge */
+.edited-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: #fef3c7;
+  color: #d97706;
+  border: 1px solid #fcd34d;
+  padding: 2px 7px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: help;
+}
+[data-theme="dark"] .edited-badge {
+  background: #78350f !important;
+  color: #fef08a !important;
+  border-color: #b45309 !important;
+}
+
 .theme-toggle-btn {
   background: var(--surface);
   border: 1px solid var(--border);
@@ -703,21 +765,27 @@ body {
 .login-gate-screen {
   position: fixed;
   top: 0; left: 0; right: 0; bottom: 0;
+  width: 100vw;
+  height: 100vh;
   background: linear-gradient(135deg, #6e1722 0%, #8B1E2B 100%);
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 5000;
+  z-index: 10000 !important;
   padding: 20px;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  touch-action: manipulation;
 }
 .login-card {
   background: var(--surface);
   border-radius: 20px;
-  padding: 36px 32px;
+  padding: 32px 28px;
   width: 100%;
   max-width: 420px;
   box-shadow: 0 25px 70px rgba(0,0,0,0.35);
   animation: modalIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  margin: auto;
 }
 .login-brand { text-align: center; margin-bottom: 24px; }
 .login-brand svg { margin-bottom: 12px; filter: drop-shadow(0 4px 10px rgba(139,30,43,0.3)); }

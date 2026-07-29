@@ -134,8 +134,41 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // Default date filter for transactions
   const dateInput = document.getElementById('txnDateFilter');
-  if (dateInput) dateInput.value = new Date().toISOString().split('T')[0];
+  if (dateInput) dateInput.value = currentDateStr;
 });
+
+// ─── Automatic Midnight Rollover System ───
+let currentDateStr = new Date().toISOString().split('T')[0];
+
+function checkMidnightRollover() {
+  const todayStr = new Date().toISOString().split('T')[0];
+  if (todayStr !== currentDateStr) {
+    console.log(`🌙 Midnight Rollover detected! Previous: ${currentDateStr}, New Day: ${todayStr}`);
+    currentDateStr = todayStr;
+
+    // Reset date filter input
+    const dateInput = document.getElementById('txnDateFilter');
+    if (dateInput) dateInput.value = todayStr;
+
+    // Refresh daily stats and views across all pages
+    loadDashboard();
+    loadTransactions();
+    watchKitchenOrders();
+    showToast('🌙 Midnight Rollover! New business day started — stats updated for today.');
+  }
+}
+
+function updateClock() {
+  const now = new Date();
+  const timeStr = now.toLocaleTimeString('en-KE', { hour: '2-digit', minute: '2-digit' });
+  const clockEl = document.getElementById('clock');
+  if (clockEl) clockEl.textContent = timeStr;
+
+  // Check for midnight rollover every minute
+  if (now.getSeconds() === 0) {
+    checkMidnightRollover();
+  }
+}
 
 // ─── Light / Dark Mode Theme System ───
 function initAppTheme() {
@@ -945,7 +978,9 @@ async function updateKitchenStatus(orderId, newStatus) {
   }
 }
 
-// ─── Transactions Tab ───
+// ─── Transactions Tab with Admin Edit & Audit Trail ───
+let editingTxnData = null;
+
 async function loadTransactions() {
   const dateVal = document.getElementById('txnDateFilter').value;
   const staffVal = document.getElementById('txnStaffFilter').value;
@@ -976,15 +1011,33 @@ async function loadTransactions() {
       const time = o.timestamp?.toDate ? o.timestamp.toDate().toLocaleTimeString('en-KE', { hour: '2-digit', minute: '2-digit' }) : '';
       const itemsSummary = (o.items || []).map(i => `${i.qty}x ${i.name}`).join(', ');
 
+      const statusBadge = o.paymentStatus === 'unpaid' 
+        ? '<span class="status-badge warning">⏳ Unpaid Tab</span>' 
+        : `<span class="order-payment-badge">${o.paymentMethod === 'mpesa' ? 'M-Pesa' : 'Cash'}</span>`;
+
+      // Audit trail tooltip
+      let editedBadgeHtml = '';
+      if (o.edited && o.editHistory && o.editHistory.length > 0) {
+        const last = o.editHistory[o.editHistory.length - 1];
+        const tooltip = `Edited by ${last.editedBy}: Total KES ${last.fromTotal} → KES ${last.toTotal} (${last.reason || 'No note'})`;
+        editedBadgeHtml = `<br><span class="edited-badge" title="${tooltip}">✏️ Edited</span>`;
+      }
+
       html += `
         <tr>
-          <td><strong>${time}</strong><br><small style="color:#6b7280;">#${doc.id.substring(0,6)}</small></td>
+          <td><strong>${time}</strong><br><small style="color:#6b7280;">#${doc.id.substring(0,6)}</small>${editedBadgeHtml}</td>
           <td><span class="order-staff-tag">👤 ${o.recordedBy || 'Staff'}</span></td>
-          <td><div style="max-width:260px;font-size:13px;">${itemsSummary}</div></td>
-          <td><span class="order-payment-badge">${o.paymentMethod === 'mpesa' ? 'M-Pesa' : 'Cash'}</span></td>
+          <td><div style="max-width:240px;font-size:13px;">${itemsSummary}</div></td>
+          <td>${statusBadge}</td>
           <td><span class="order-source ${o.source || 'desktop'}">${o.source || 'desktop'}</span></td>
           <td><strong>KES ${(o.total || 0).toLocaleString()}</strong></td>
-          <td><button class="btn-secondary" style="padding:4px 8px;font-size:12px;" onclick="printReceiptReprint('${doc.id}')">🧾 Receipt</button></td>
+          <td>
+            <div style="display:flex;gap:4px;flex-wrap:wrap;">
+              <button class="btn-secondary" style="padding:4px 8px;font-size:11.5px;" onclick="printReceiptReprint('${doc.id}')">🧾</button>
+              <button class="btn-secondary" style="padding:4px 8px;font-size:11.5px;" onclick="openEditTxnModal('${doc.id}')" title="Edit Transaction (Admin)">✏️</button>
+              <button class="btn-secondary danger" style="padding:4px 8px;font-size:11.5px;" onclick="deleteTransaction('${doc.id}')" title="Delete Transaction (Admin)">🗑️</button>
+            </div>
+          </td>
         </tr>
       `;
     });
@@ -1000,8 +1053,130 @@ async function loadTransactions() {
   }
 }
 
-function printReceiptReprint(orderId) {
-  showToast(`🧾 Re-printing receipt for #${orderId.substring(0,6)}...`);
+async function openEditTxnModal(docId) {
+  if (!isAdminUnlocked && authRole !== 'admin') {
+    requestAdminAuth('transactions');
+    showToast('🔒 Admin authentication required to edit transactions.');
+    return;
+  }
+
+  try {
+    const doc = await ordersRef.doc(docId).get();
+    if (!doc.exists) return;
+    editingTxnData = { id: doc.id, ...doc.data() };
+
+    document.getElementById('editTxnDocId').value = doc.id;
+    document.getElementById('editTxnNumTitle').textContent = `#${doc.data().orderNumber || doc.id.substring(0,6)}`;
+    document.getElementById('editTxnStatus').value = doc.data().paymentStatus || 'paid';
+    document.getElementById('editTxnMethod').value = doc.data().paymentMethod || 'cash';
+    document.getElementById('editTxnTotal').value = doc.data().total || 0;
+    document.getElementById('editTxnReason').value = '';
+
+    onEditTxnStatusChange(doc.data().paymentStatus || 'paid');
+
+    // Display audit history list
+    const auditBox = document.getElementById('editTxnAuditBox');
+    const auditList = document.getElementById('editTxnAuditList');
+    if (doc.data().editHistory && doc.data().editHistory.length > 0) {
+      auditList.innerHTML = doc.data().editHistory.map(h => `
+        <div style="padding:4px 0;border-bottom:1px dashed var(--border);">
+          <strong>${h.editedBy}</strong> (${new Date(h.timestamp).toLocaleTimeString('en-KE')})<br>
+          Total: KES ${h.fromTotal} → KES ${h.toTotal} | ${h.fromStatus} → ${h.toStatus}<br>
+          <small style="color:var(--text-muted);">${h.reason || 'No note'}</small>
+        </div>
+      `).join('');
+      auditBox.style.display = 'block';
+    } else {
+      auditBox.style.display = 'none';
+    }
+
+    document.getElementById('editTxnModal').classList.add('show');
+  } catch (e) {
+    showToast('❌ Error loading transaction: ' + e.message);
+  }
+}
+
+function onEditTxnStatusChange(status) {
+  const methodGroup = document.getElementById('editTxnMethodGroup');
+  if (methodGroup) {
+    methodGroup.style.display = status === 'unpaid' ? 'none' : 'block';
+  }
+}
+
+async function saveEditedTransaction() {
+  if (!editingTxnData) return;
+
+  const docId = document.getElementById('editTxnDocId').value;
+  const newStatus = document.getElementById('editTxnStatus').value;
+  const newMethod = newStatus === 'unpaid' ? 'unpaid' : document.getElementById('editTxnMethod').value;
+  const newTotal = parseFloat(document.getElementById('editTxnTotal').value) || 0;
+  const reason = document.getElementById('editTxnReason').value.trim() || 'Admin manual update';
+
+  const oldTotal = editingTxnData.total || 0;
+  const oldStatus = editingTxnData.paymentStatus || 'paid';
+  const oldMethod = editingTxnData.paymentMethod || 'cash';
+
+  const auditEntry = {
+    editedBy: activeStaff || 'Admin',
+    timestamp: new Date().toISOString(),
+    fromTotal: oldTotal,
+    toTotal: newTotal,
+    fromStatus: oldStatus,
+    toStatus: newStatus,
+    fromMethod: oldMethod,
+    toMethod: newMethod,
+    reason: reason
+  };
+
+  try {
+    await ordersRef.doc(docId).update({
+      total: newTotal,
+      paymentStatus: newStatus,
+      paymentMethod: newMethod,
+      edited: true,
+      editHistory: firebase.firestore.FieldValue.arrayUnion(auditEntry)
+    });
+
+    closeModal('editTxnModal');
+    showToast(`✅ Transaction #${editingTxnData.orderNumber || docId.substring(0,6)} updated cleanly!`);
+    loadTransactions();
+    loadDashboard();
+  } catch (e) {
+    showToast('❌ Error saving edit: ' + e.message);
+  }
+}
+
+async function deleteTransaction(docId) {
+  if (!isAdminUnlocked && authRole !== 'admin') {
+    requestAdminAuth('transactions');
+    showToast('🔒 Admin authentication required to delete transactions.');
+    return;
+  }
+
+  if (confirm(`⚠️ Are you sure you want to delete Transaction #${docId.substring(0,6)}? This cannot be undone.`)) {
+    try {
+      await ordersRef.doc(docId).delete();
+      showToast(`🗑️ Transaction #${docId.substring(0,6)} deleted.`);
+      loadTransactions();
+      loadDashboard();
+    } catch (e) {
+      showToast('❌ Error deleting transaction: ' + e.message);
+    }
+  }
+}
+
+async function printReceiptReprint(orderId) {
+  try {
+    const doc = await ordersRef.doc(orderId).get();
+    if (!doc.exists) return;
+    const d = doc.data();
+    const dateStr = d.timestamp ? new Date(d.timestamp.seconds * 1000).toLocaleString('en-KE') : new Date().toLocaleString('en-KE');
+    populatePrintableReceipt(d.orderNumber || orderId.substring(0,6), dateStr, d.recordedBy || 'Staff', d.items || [], d.total || 0, d.paymentMethod || 'cash');
+    showToast(`🧾 Re-printing receipt for Order #${d.orderNumber || orderId.substring(0,6)}...`);
+    setTimeout(() => { try { window.print(); } catch(e) {} }, 300);
+  } catch(e) {
+    showToast('❌ Error fetching receipt: ' + e.message);
+  }
 }
 
 // ─── Menu Management Tab ───

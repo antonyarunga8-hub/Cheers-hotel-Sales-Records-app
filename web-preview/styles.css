@@ -761,6 +761,13 @@ body {
 .status-btn.active[data-status="paid"] { border-color: var(--success); background: #dcfce7; color: #15803d; }
 .status-btn.active[data-status="unpaid"] { border-color: var(--warning); background: #fffbeb; color: #b45309; }
 
+/* Disabled standalone style for Cash/M-Pesa when Unpaid Tab is selected */
+.payment-toggle.disabled-standalone {
+  opacity: 0.45;
+  pointer-events: none;
+  filter: grayscale(1);
+}
+
 /* ─── SIDEBAR TOGGLE & BACKDROP OVERLAY ─── */
 .sidebar-menu-btn {
   display: none;

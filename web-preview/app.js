@@ -626,17 +626,44 @@ function updateCart() {
 }
 
 function setPayment(method) {
+  // Selecting Cash or M-Pesa automatically pairs with PAID status
+  paymentStatus = 'paid';
   paymentMethod = method;
-  document.querySelectorAll('.pay-btn').forEach(btn => {
-    btn.classList.toggle('active', btn.dataset.method === method);
-  });
+  updatePaymentUI();
 }
 
 function setPaymentStatus(status) {
   paymentStatus = status;
+  if (status === 'unpaid') {
+    // Unpaid Tab is a standalone option — not paired with Cash or M-Pesa
+    paymentMethod = 'unpaid';
+  } else {
+    // Paid status must be paired with Cash or M-Pesa
+    if (paymentMethod === 'unpaid' || !paymentMethod) {
+      paymentMethod = 'cash';
+    }
+  }
+  updatePaymentUI();
+}
+
+function updatePaymentUI() {
+  // Update Payment Status buttons (Paid vs Unpaid Tab)
   document.querySelectorAll('.status-btn').forEach(btn => {
-    btn.classList.toggle('active', btn.dataset.status === status);
+    btn.classList.toggle('active', btn.dataset.status === paymentStatus);
   });
+
+  // Update Payment Method buttons (Cash vs M-Pesa)
+  const payToggleContainer = document.querySelector('.payment-toggle');
+  if (paymentStatus === 'unpaid') {
+    // Dim & deselect Cash / M-Pesa options when Unpaid Tab is active
+    document.querySelectorAll('.pay-btn').forEach(btn => btn.classList.remove('active'));
+    if (payToggleContainer) payToggleContainer.classList.add('disabled-standalone');
+  } else {
+    if (payToggleContainer) payToggleContainer.classList.remove('disabled-standalone');
+    document.querySelectorAll('.pay-btn').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.method === paymentMethod);
+    });
+  }
 }
 
 // ─── Order Checkout & Confirmation ───
@@ -660,12 +687,15 @@ function confirmOrder() {
   const sourceSelect = document.getElementById('settingSource');
   const source = sourceSelect ? sourceSelect.value : (window.innerWidth < 768 ? 'mobile' : 'desktop');
 
+  const paymentText = paymentStatus === 'unpaid' 
+    ? '⏳ Unpaid Credit Tab (Standalone)' 
+    : `✅ Paid via ${paymentMethod === 'mpesa' ? '📱 M-Pesa' : '💵 Cash'}`;
+
   document.getElementById('confirmItems').innerHTML = html;
   document.getElementById('confirmTotal').innerHTML = `<span>TOTAL AMOUNT</span><span>KES ${total.toLocaleString()}</span>`;
   document.getElementById('confirmPayment').innerHTML = `
     <span>Staff: <strong>${activeStaff}</strong></span> • 
-    <span>Status: <strong>${paymentStatus === 'paid' ? '✅ Paid' : '⏳ Unpaid (Tab)'}</strong></span> • 
-    <span>Payment: <strong>${paymentMethod === 'mpesa' ? '📱 M-Pesa' : '💵 Cash'}</strong></span>
+    <span>Order Type: <strong>${paymentText}</strong></span>
   `;
   document.getElementById('confirmModal').classList.add('show');
 }

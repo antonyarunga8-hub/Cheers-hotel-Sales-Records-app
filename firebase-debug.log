@@ -1,48 +1,48 @@
-[debug] [2026-07-29T08:25:32.044Z] ----------------------------------------------------------------------
-[debug] [2026-07-29T08:25:32.048Z] Command:       /usr/local/bin/node /Users/simon/.npm-global/bin/firebase deploy --only hosting --project cheers-hotel-bf5ce
-[debug] [2026-07-29T08:25:32.049Z] CLI Version:   15.24.0
-[debug] [2026-07-29T08:25:32.049Z] Platform:      darwin
-[debug] [2026-07-29T08:25:32.049Z] Node Version:  v24.14.0
-[debug] [2026-07-29T08:25:32.049Z] Detected Agent: antigravity
-[debug] [2026-07-29T08:25:32.049Z] Time:          Wed Jul 29 2026 11:25:32 GMT+0300 (East Africa Time)
-[debug] [2026-07-29T08:25:32.050Z] ----------------------------------------------------------------------
+[debug] [2026-07-29T08:51:41.763Z] ----------------------------------------------------------------------
+[debug] [2026-07-29T08:51:41.768Z] Command:       /usr/local/bin/node /Users/simon/.npm-global/bin/firebase deploy --only hosting --project cheers-hotel-bf5ce
+[debug] [2026-07-29T08:51:41.768Z] CLI Version:   15.24.0
+[debug] [2026-07-29T08:51:41.769Z] Platform:      darwin
+[debug] [2026-07-29T08:51:41.769Z] Node Version:  v24.14.0
+[debug] [2026-07-29T08:51:41.769Z] Detected Agent: antigravity
+[debug] [2026-07-29T08:51:41.769Z] Time:          Wed Jul 29 2026 11:51:41 GMT+0300 (East Africa Time)
+[debug] [2026-07-29T08:51:41.769Z] ----------------------------------------------------------------------
 [debug] 
-[debug] [2026-07-29T08:25:35.297Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
-[debug] [2026-07-29T08:25:35.298Z] > authorizing via signed-in user (antonyarunga8@gmail.com)
-[debug] [2026-07-29T08:25:35.298Z] [iam] checking project cheers-hotel-bf5ce for permissions ["firebase.projects.get","firebasehosting.sites.update"]
-[debug] [2026-07-29T08:25:35.325Z] Checked if tokens are valid: true, expires at: 1785316338305
-[debug] [2026-07-29T08:25:35.325Z] Checked if tokens are valid: true, expires at: 1785316338305
-[debug] [2026-07-29T08:25:35.328Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/cheers-hotel-bf5ce:testIamPermissions [none]
-[debug] [2026-07-29T08:25:35.328Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/cheers-hotel-bf5ce:testIamPermissions  x-goog-user-project=cheers-hotel-bf5ce
-[debug] [2026-07-29T08:25:35.328Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/cheers-hotel-bf5ce:testIamPermissions {"permissions":["firebase.projects.get","firebasehosting.sites.update"]}
-[debug] [2026-07-29T08:25:37.468Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects/cheers-hotel-bf5ce:testIamPermissions 200
-[debug] [2026-07-29T08:25:37.469Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/cheers-hotel-bf5ce:testIamPermissions {"permissions":["firebase.projects.get","firebasehosting.sites.update"]}
-[debug] [2026-07-29T08:25:37.470Z] Checked if tokens are valid: true, expires at: 1785316338305
-[debug] [2026-07-29T08:25:37.470Z] Checked if tokens are valid: true, expires at: 1785316338305
-[debug] [2026-07-29T08:25:37.470Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/cheers-hotel-bf5ce [none]
-[debug] [2026-07-29T08:25:38.335Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/cheers-hotel-bf5ce 200
-[debug] [2026-07-29T08:25:38.335Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/cheers-hotel-bf5ce {"projectId":"cheers-hotel-bf5ce","projectNumber":"574024389328","displayName":"Cheers-hotel","name":"projects/cheers-hotel-bf5ce","resources":{"hostingSite":"cheers-hotel-bf5ce"},"state":"ACTIVE","labels":{"firebase":"enabled"},"etag":"1_70017919-22cb-403c-aa76-6b5211943f44"}
+[debug] [2026-07-29T08:51:44.452Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2026-07-29T08:51:44.452Z] > authorizing via signed-in user (antonyarunga8@gmail.com)
+[debug] [2026-07-29T08:51:44.452Z] [iam] checking project cheers-hotel-bf5ce for permissions ["firebase.projects.get","firebasehosting.sites.update"]
+[debug] [2026-07-29T08:51:44.473Z] Checked if tokens are valid: true, expires at: 1785316338305
+[debug] [2026-07-29T08:51:44.473Z] Checked if tokens are valid: true, expires at: 1785316338305
+[debug] [2026-07-29T08:51:44.475Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/cheers-hotel-bf5ce:testIamPermissions [none]
+[debug] [2026-07-29T08:51:44.475Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/cheers-hotel-bf5ce:testIamPermissions  x-goog-user-project=cheers-hotel-bf5ce
+[debug] [2026-07-29T08:51:44.475Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/cheers-hotel-bf5ce:testIamPermissions {"permissions":["firebase.projects.get","firebasehosting.sites.update"]}
+[debug] [2026-07-29T08:51:45.355Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects/cheers-hotel-bf5ce:testIamPermissions 200
+[debug] [2026-07-29T08:51:45.356Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/cheers-hotel-bf5ce:testIamPermissions {"permissions":["firebase.projects.get","firebasehosting.sites.update"]}
+[debug] [2026-07-29T08:51:45.357Z] Checked if tokens are valid: true, expires at: 1785316338305
+[debug] [2026-07-29T08:51:45.357Z] Checked if tokens are valid: true, expires at: 1785316338305
+[debug] [2026-07-29T08:51:45.358Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/cheers-hotel-bf5ce [none]
+[debug] [2026-07-29T08:51:46.141Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/cheers-hotel-bf5ce 200
+[debug] [2026-07-29T08:51:46.141Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/cheers-hotel-bf5ce {"projectId":"cheers-hotel-bf5ce","projectNumber":"574024389328","displayName":"Cheers-hotel","name":"projects/cheers-hotel-bf5ce","resources":{"hostingSite":"cheers-hotel-bf5ce"},"state":"ACTIVE","labels":{"firebase":"enabled"},"etag":"1_70017919-22cb-403c-aa76-6b5211943f44"}
 [info] 
 [info] === Deploying to 'cheers-hotel-bf5ce'...
 [info] 
 [info] i  deploying hosting 
-[debug] [2026-07-29T08:25:38.340Z] Checked if tokens are valid: true, expires at: 1785316338305
-[debug] [2026-07-29T08:25:38.340Z] Checked if tokens are valid: true, expires at: 1785316338305
-[debug] [2026-07-29T08:25:38.340Z] >>> [apiv2][query] GET https://firebasehosting.googleapis.com/v1beta1/projects/cheers-hotel-bf5ce/sites/cheers-hotel-bf5ce [none]
-[debug] [2026-07-29T08:25:40.385Z] <<< [apiv2][status] GET https://firebasehosting.googleapis.com/v1beta1/projects/cheers-hotel-bf5ce/sites/cheers-hotel-bf5ce 200
-[debug] [2026-07-29T08:25:40.385Z] <<< [apiv2][body] GET https://firebasehosting.googleapis.com/v1beta1/projects/cheers-hotel-bf5ce/sites/cheers-hotel-bf5ce {"name":"projects/cheers-hotel-bf5ce/sites/cheers-hotel-bf5ce","defaultUrl":"https://cheers-hotel-bf5ce.web.app","type":"DEFAULT_SITE"}
-[debug] [2026-07-29T08:25:40.388Z] Checked if tokens are valid: true, expires at: 1785316338305
-[debug] [2026-07-29T08:25:40.388Z] Checked if tokens are valid: true, expires at: 1785316338305
-[debug] [2026-07-29T08:25:40.389Z] >>> [apiv2][query] POST https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/cheers-hotel-bf5ce/versions [none]
-[debug] [2026-07-29T08:25:40.393Z] >>> [apiv2][body] POST https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/cheers-hotel-bf5ce/versions {"status":"CREATED","labels":{"deployment-tool":"cli-firebase"}}
-[debug] [2026-07-29T08:25:42.344Z] <<< [apiv2][status] POST https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/cheers-hotel-bf5ce/versions 200
-[debug] [2026-07-29T08:25:42.344Z] <<< [apiv2][body] POST https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/cheers-hotel-bf5ce/versions {"name":"projects/574024389328/sites/cheers-hotel-bf5ce/versions/6c291bb07c681425","status":"CREATED","config":{},"labels":{"deployment-tool":"cli-firebase"}}
+[debug] [2026-07-29T08:51:46.145Z] Checked if tokens are valid: true, expires at: 1785316338305
+[debug] [2026-07-29T08:51:46.145Z] Checked if tokens are valid: true, expires at: 1785316338305
+[debug] [2026-07-29T08:51:46.145Z] >>> [apiv2][query] GET https://firebasehosting.googleapis.com/v1beta1/projects/cheers-hotel-bf5ce/sites/cheers-hotel-bf5ce [none]
+[debug] [2026-07-29T08:51:48.492Z] <<< [apiv2][status] GET https://firebasehosting.googleapis.com/v1beta1/projects/cheers-hotel-bf5ce/sites/cheers-hotel-bf5ce 200
+[debug] [2026-07-29T08:51:48.492Z] <<< [apiv2][body] GET https://firebasehosting.googleapis.com/v1beta1/projects/cheers-hotel-bf5ce/sites/cheers-hotel-bf5ce {"name":"projects/cheers-hotel-bf5ce/sites/cheers-hotel-bf5ce","defaultUrl":"https://cheers-hotel-bf5ce.web.app","type":"DEFAULT_SITE"}
+[debug] [2026-07-29T08:51:48.495Z] Checked if tokens are valid: true, expires at: 1785316338305
+[debug] [2026-07-29T08:51:48.495Z] Checked if tokens are valid: true, expires at: 1785316338305
+[debug] [2026-07-29T08:51:48.496Z] >>> [apiv2][query] POST https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/cheers-hotel-bf5ce/versions [none]
+[debug] [2026-07-29T08:51:48.496Z] >>> [apiv2][body] POST https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/cheers-hotel-bf5ce/versions {"status":"CREATED","labels":{"deployment-tool":"cli-firebase"}}
+[debug] [2026-07-29T08:51:50.290Z] <<< [apiv2][status] POST https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/cheers-hotel-bf5ce/versions 200
+[debug] [2026-07-29T08:51:50.291Z] <<< [apiv2][body] POST https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/cheers-hotel-bf5ce/versions {"name":"projects/574024389328/sites/cheers-hotel-bf5ce/versions/2b666c22ea7796d2","status":"CREATED","config":{},"labels":{"deployment-tool":"cli-firebase"}}
 [info] i  hosting[cheers-hotel-bf5ce]: beginning deploy... 
 [info] i  hosting[cheers-hotel-bf5ce]: found 3 files in web-preview 
-[debug] [2026-07-29T08:25:42.364Z] [hosting] uploading with 200 concurrency
-[debug] [2026-07-29T08:25:42.367Z] Checked if tokens are valid: true, expires at: 1785316338305
-[debug] [2026-07-29T08:25:42.367Z] Checked if tokens are valid: true, expires at: 1785316338305
-[debug] [2026-07-29T08:25:42.368Z] [hosting] hash cache [d2ViLXByZXZpZXc] stored for 3 files
-[debug] [2026-07-29T08:25:42.369Z] [hosting][hash queue][FINAL] {"max":1,"min":0,"avg":0,"active":0,"complete":3,"success":3,"errored":0,"retried":0,"total":3,"elapsed":3}
-[debug] [2026-07-29T08:25:42.369Z] >>> [apiv2][query] POST https://firebasehosting.googleapis.com/v1beta1/projects/574024389328/sites/cheers-hotel-bf5ce/versions/6c291bb07c681425:populateFiles [none]
-[debug] [2026-07-29T08:25:42.369Z] >>> [apiv2][body] POST https://firebasehosting.googleapis.com/v1beta1/projects/574024389328/sites/cheers-hotel-bf5ce/versions/6c291bb07c681425:populateFiles {"files":{"/styles.css":"910a6182f227a4c3e6670ab1eae24de05aa675a89e6ad7496e041dd57b66cdfc","/index.html":"2777bb56020f88f06b30abf03851988feded8836b95db4263c8924ce3417faea","/app.js":"239a3e0b151bd716c1823d782ba176196352a7de7af8065ad188e29821c1c98d"}}
+[debug] [2026-07-29T08:51:50.308Z] [hosting] uploading with 200 concurrency
+[debug] [2026-07-29T08:51:50.315Z] Checked if tokens are valid: true, expires at: 1785316338305
+[debug] [2026-07-29T08:51:50.315Z] Checked if tokens are valid: true, expires at: 1785316338305
+[debug] [2026-07-29T08:51:50.316Z] [hosting] hash cache [d2ViLXByZXZpZXc] stored for 3 files
+[debug] [2026-07-29T08:51:50.316Z] [hosting][hash queue][FINAL] {"max":1,"min":1,"avg":1,"active":0,"complete":3,"success":3,"errored":0,"retried":0,"total":3,"elapsed":2}
+[debug] [2026-07-29T08:51:50.316Z] >>> [apiv2][query] POST https://firebasehosting.googleapis.com/v1beta1/projects/574024389328/sites/cheers-hotel-bf5ce/versions/2b666c22ea7796d2:populateFiles [none]
+[debug] [2026-07-29T08:51:50.316Z] >>> [apiv2][body] POST https://firebasehosting.googleapis.com/v1beta1/projects/574024389328/sites/cheers-hotel-bf5ce/versions/2b666c22ea7796d2:populateFiles {"files":{"/styles.css":"f84873a97bc39efa2fb600b798182d396a78abae3935e485a118d3c55e99e9df","/index.html":"9228d6bbb3da3bcaa113a818f39ad374e2e304fe29ccc37bbbe7875ca99991d2","/app.js":"d2cec927e018308e1f2e6158f6941b4116e5bef9502a2f76ffe3c69528677fb3"}}

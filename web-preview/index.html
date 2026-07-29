@@ -9,6 +9,59 @@
   <link rel="stylesheet" href="styles.css?v=1.0.2">
 </head>
 <body>
+  <!-- Mandatory Login Gate Screen (Cookies & Role Auth) -->
+  <div class="login-gate-screen" id="loginGateScreen">
+    <div class="login-card">
+      <div class="login-brand">
+        <svg width="60" height="60" viewBox="0 0 100 100" fill="none">
+          <rect width="100" height="100" rx="20" fill="#8B1E2B"/>
+          <text x="20" y="55" font-family="'Georgia', serif" font-size="52" font-weight="bold" fill="#ffffff">C</text>
+          <text x="36" y="78" font-family="'Georgia', serif" font-size="44" font-weight="bold" fill="#fca5a5">H</text>
+        </svg>
+        <h2>CHEERS HOTEL</h2>
+        <span>Sales & POS System • Vihiga, Mbale</span>
+      </div>
+
+      <div class="auth-role-tabs">
+        <button class="role-tab-btn active" id="staffRoleTab" onclick="setAuthRoleMode('staff')">👤 Staff Login</button>
+        <button class="role-tab-btn" id="adminRoleTab" onclick="setAuthRoleMode('admin')">👑 Admin Login</button>
+      </div>
+
+      <!-- Staff Form -->
+      <form id="staffLoginForm" onsubmit="handleAuthLogin(event)">
+        <div class="form-group">
+          <label>Select Staff Member</label>
+          <select id="loginStaffSelect">
+            <option value="Cathy">Cathy</option>
+            <option value="Aggy">Aggy</option>
+            <option value="Evelyne">Evelyne</option>
+            <option value="Wendy">Wendy</option>
+            <option value="Caro">Caro</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Shift Passcode / PIN</label>
+          <input type="password" id="loginStaffPin" placeholder="Enter PIN (Default: 1234)" required>
+        </div>
+        <div class="form-group-checkbox">
+          <label><input type="checkbox" id="rememberMeStaff" checked> Remember login session (Cookies)</label>
+        </div>
+        <button type="submit" class="btn-primary btn-login">🔓 Sign In to POS</button>
+      </form>
+
+      <!-- Admin Form -->
+      <form id="adminLoginForm" style="display:none;" onsubmit="handleAuthLogin(event)">
+        <div class="form-group">
+          <label>Admin Passcode (PIN)</label>
+          <input type="password" id="loginAdminPin" placeholder="Enter Admin PIN (Default: 1234)" required>
+        </div>
+        <div class="form-group-checkbox">
+          <label><input type="checkbox" id="rememberMeAdmin" checked> Remember Admin session (Cookies)</label>
+        </div>
+        <button type="submit" class="btn-primary btn-login">👑 Sign In as Admin</button>
+      </form>
+    </div>
+  </div>
   <!-- Sidebar Overlay Backdrop for Mobile -->
   <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebarMenu()"></div>
 
@@ -194,6 +247,14 @@
           </div>
 
           <div class="cart-footer">
+            <div class="payment-status-toggle">
+              <label>Payment Status:</label>
+              <div class="status-btn-group">
+                <button class="status-btn active" data-status="paid" onclick="setPaymentStatus('paid')">✅ Paid</button>
+                <button class="status-btn" data-status="unpaid" onclick="setPaymentStatus('unpaid')">⏳ Unpaid (Tab)</button>
+              </div>
+            </div>
+
             <div class="payment-toggle">
               <button class="pay-btn active" data-method="cash" onclick="setPayment('cash')">💵 Cash</button>
               <button class="pay-btn" data-method="mpesa" onclick="setPayment('mpesa')">📱 M-Pesa</button>
@@ -552,7 +613,6 @@
       <button onclick="askFaq('How do I record a sale and print receipt?')">🧾 How to print?</button>
       <button onclick="askFaq('What is the printer IP & MAC address?')">🖨️ Printer Config</button>
       <button onclick="askFaq('Where is Cheers Hotel located?')">📍 Hotel Location</button>
-      <button onclick="askFaq('What is the Admin PIN?')">🔒 Admin PIN</button>
       <button onclick="askFaq('How do I add a new menu item?')">➕ Add Menu Item</button>
       <button onclick="askFaq('How do staff shifts work?')">👤 Staff Shifts</button>
     </div>
@@ -576,6 +636,6 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
-  <script src="app.js?v=1.0.4"></script>
+  <script src="app.js?v=1.0.5"></script>
 </body>
 </html>

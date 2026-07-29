@@ -75,34 +75,52 @@ let menuItems = {};         // { id: {...} }
 let activeCategory = '⭐ Favorites';
 let searchQuery = '';
 let paymentMethod = 'cash';
+let paymentStatus = 'paid'; // 'paid' | 'unpaid'
 let currentPeriod = 'today';
 let activeStaff = localStorage.getItem('cheers_staff') || 'Cathy';
 let adminPin = localStorage.getItem('cheers_admin_pin') || '1234';
 let isAdminUnlocked = false;
+let authRole = 'staff';     // 'staff' | 'admin'
+let authUser = null;
 let pendingTargetTab = null;
 let orderCounter = parseInt(localStorage.getItem('cheers_order_counter') || '0', 10);
 
-// ─── Initialization ───
+// ─── Cookie Utilities ───
+function setCookie(name, value, days = 7) {
+  const expires = new Date(Date.now() + days * 864e5).toUTCString();
+  document.cookie = name + '=' + encodeURIComponent(value) + '; expires=' + expires + '; path=/; SameSite=Lax';
+}
+
+function getCookie(name) {
+  return document.cookie.split('; ').reduce((r, v) => {
+    const parts = v.split('=');
+    return parts[0] === name ? decodeURIComponent(parts[1]) : r;
+  }, '');
+}
+
+function eraseCookie(name) {
+  document.cookie = name + '=; Max-Age=-99999999; path=/;';
+}
+
+// ─── Initialization & Mandatory Auth Gate ───
 document.addEventListener('DOMContentLoaded', async () => {
   updateClock();
   setInterval(updateClock, 1000);
 
-  // Restore active staff selector
-  const staffSelect = document.getElementById('activeStaff');
-  if (staffSelect) staffSelect.value = activeStaff;
-  updateStaffDisplay();
-
   try {
     await auth.signInAnonymously();
-    console.log('Auth OK');
+    console.log('Firebase Auth OK');
   } catch (e) {
-    console.warn('Auth notice:', e.message);
+    console.warn('Firebase Auth notice:', e.message);
   }
 
   // Network online/offline monitor
   window.addEventListener('online', updateNetworkStatus);
   window.addEventListener('offline', updateNetworkStatus);
   updateNetworkStatus();
+
+  // Check Cookie / Storage Auth Session
+  checkAuthSession();
 
   // Listeners
   watchMenu();
@@ -113,6 +131,88 @@ document.addEventListener('DOMContentLoaded', async () => {
   const dateInput = document.getElementById('txnDateFilter');
   if (dateInput) dateInput.value = new Date().toISOString().split('T')[0];
 });
+
+function checkAuthSession() {
+  const sessionCookie = getCookie('cheers_auth_session') || localStorage.getItem('cheers_auth_session');
+  if (sessionCookie) {
+    try {
+      const sess = JSON.parse(sessionCookie);
+      authUser = sess.name;
+      authRole = sess.role;
+      if (authRole === 'admin') {
+        isAdminUnlocked = true;
+      } else {
+        activeStaff = sess.name;
+        localStorage.setItem('cheers_staff', sess.name);
+      }
+      hideLoginGate();
+      updateStaffDisplay();
+      return;
+    } catch (e) {}
+  }
+  showLoginGate();
+}
+
+function showLoginGate() {
+  const gate = document.getElementById('loginGateScreen');
+  if (gate) gate.style.display = 'flex';
+}
+
+function hideLoginGate() {
+  const gate = document.getElementById('loginGateScreen');
+  if (gate) gate.style.display = 'none';
+}
+
+function setAuthRoleMode(role) {
+  authRole = role;
+  document.getElementById('staffRoleTab').classList.toggle('active', role === 'staff');
+  document.getElementById('adminRoleTab').classList.toggle('active', role === 'admin');
+  document.getElementById('staffLoginForm').style.display = role === 'staff' ? 'block' : 'none';
+  document.getElementById('adminLoginForm').style.display = role === 'admin' ? 'block' : 'none';
+}
+
+function handleAuthLogin(e) {
+  e.preventDefault();
+
+  if (authRole === 'staff') {
+    const staffName = document.getElementById('loginStaffSelect').value;
+    const pin = document.getElementById('loginStaffPin').value;
+    if (pin !== '1234' && pin !== adminPin) {
+      showToast('❌ Incorrect Passcode. Default PIN is 1234.');
+      return;
+    }
+    activeStaff = staffName;
+    authUser = staffName;
+    localStorage.setItem('cheers_staff', staffName);
+
+    const remember = document.getElementById('rememberMeStaff').checked;
+    const sess = { role: 'staff', name: staffName };
+    if (remember) setCookie('cheers_auth_session', JSON.stringify(sess), 7);
+    localStorage.setItem('cheers_auth_session', JSON.stringify(sess));
+
+    hideLoginGate();
+    updateStaffDisplay();
+    showToast(`🔓 Welcome, ${staffName}! POS session active.`);
+  } else {
+    const pin = document.getElementById('loginAdminPin').value;
+    if (pin !== adminPin) {
+      showToast('❌ Incorrect Admin PIN. Default is 1234.');
+      return;
+    }
+    authRole = 'admin';
+    authUser = 'Admin';
+    isAdminUnlocked = true;
+
+    const remember = document.getElementById('rememberMeAdmin').checked;
+    const sess = { role: 'admin', name: 'Admin' };
+    if (remember) setCookie('cheers_auth_session', JSON.stringify(sess), 7);
+    localStorage.setItem('cheers_auth_session', JSON.stringify(sess));
+
+    hideLoginGate();
+    updateStaffDisplay();
+    showToast('👑 Welcome Admin! Full management access unlocked.');
+  }
+}
 
 function updateClock() {
   const now = new Date();
@@ -183,9 +283,12 @@ function openStaffLogoutModal() {
 
 function confirmStaffLogout() {
   closeModal('staffLogoutModal');
-  showToast(`🚪 Shift ended for ${activeStaff}. Please select staff member for next shift.`);
-  const staffSelect = document.getElementById('activeStaff');
-  if (staffSelect) staffSelect.focus();
+  eraseCookie('cheers_auth_session');
+  localStorage.removeItem('cheers_auth_session');
+  isAdminUnlocked = false;
+  authUser = null;
+  showToast(`🚪 Shift logged out. Please sign in again.`);
+  showLoginGate();
 }
 
 // ─── Navigation ───
@@ -457,6 +560,13 @@ function setPayment(method) {
   });
 }
 
+function setPaymentStatus(status) {
+  paymentStatus = status;
+  document.querySelectorAll('.status-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.status === status);
+  });
+}
+
 // ─── Order Checkout & Confirmation ───
 function confirmOrder() {
   if (Object.keys(cart).length === 0) return;
@@ -476,14 +586,14 @@ function confirmOrder() {
   });
 
   const sourceSelect = document.getElementById('settingSource');
-  const source = sourceSelect ? sourceSelect.value : 'desktop';
+  const source = sourceSelect ? sourceSelect.value : (window.innerWidth < 768 ? 'mobile' : 'desktop');
 
   document.getElementById('confirmItems').innerHTML = html;
   document.getElementById('confirmTotal').innerHTML = `<span>TOTAL AMOUNT</span><span>KES ${total.toLocaleString()}</span>`;
   document.getElementById('confirmPayment').innerHTML = `
     <span>Staff: <strong>${activeStaff}</strong></span> • 
-    <span>Payment: <strong>${paymentMethod === 'mpesa' ? '📱 M-Pesa' : '💵 Cash'}</strong></span> • 
-    <span>Source: <strong>${source.toUpperCase()}</strong></span>
+    <span>Status: <strong>${paymentStatus === 'paid' ? '✅ Paid' : '⏳ Unpaid (Tab)'}</strong></span> • 
+    <span>Payment: <strong>${paymentMethod === 'mpesa' ? '📱 M-Pesa' : '💵 Cash'}</strong></span>
   `;
   document.getElementById('confirmModal').classList.add('show');
 }
@@ -521,6 +631,7 @@ async function recordSale() {
       recordedBy: activeStaff,
       source: source,
       paymentMethod: paymentMethod,
+      paymentStatus: paymentStatus,
       synced: true,
       receiptPrinted: source === 'desktop',
       kitchenStatus: 'pending'
@@ -1225,15 +1336,15 @@ function getAiResponse(query) {
   }
 
   if (q.includes('pin') || q.includes('admin') || q.includes('lock') || q.includes('passcode')) {
-    return '🔒 <strong>Admin PIN & Security:</strong><br>The default Admin PIN is <strong>1234</strong>. It locks <strong>Menu Management</strong> and <strong>Sales Analytics</strong> to prevent unauthorized price changes. You can update the PIN in Settings.';
+    return '🔒 <strong>Admin Security & Permissions:</strong><br><strong>Menu Management</strong> and <strong>Sales Analytics</strong> are restricted to management. Please contact your system administrator to access protected features.';
   }
 
   if (q.includes('menu') || q.includes('item') || q.includes('add') || q.includes('price') || q.includes('stock')) {
-    return '➕ <strong>Menu Management:</strong><br>1. Tap <strong>Menu Management 🔒</strong> in sidebar (Enter PIN: 1234).<br>2. Tap <strong>+ Add Item</strong> or <strong>✏️ Edit</strong> to change prices.<br>3. Toggle <strong>In Stock / Out of Stock</strong> to mark items unavailable.';
+    return '➕ <strong>Menu Management:</strong><br>1. Tap <strong>Menu Management 🔒</strong> in sidebar (requires Admin access).<br>2. Tap <strong>+ Add Item</strong> or <strong>✏️ Edit</strong> to change prices.<br>3. Toggle <strong>In Stock / Out of Stock</strong> to mark items unavailable.';
   }
 
   if (q.includes('staff') || q.includes('shift') || q.includes('cathy') || q.includes('logout') || q.includes('who')) {
-    return '👤 <strong>Staff Shift System:</strong><br>Select operating staff (Cathy, Aggy, Evelyne, Wendy, Caro) in the sidebar. Tap <strong>🚪 Logout</strong> in the top header to end shift for reconciliation.';
+    return '👤 <strong>Staff Shift System:</strong><br>Sign in with your staff account (Cathy, Aggy, Evelyne, Wendy, Caro). Tap <strong>🚪 Logout</strong> in the top header when ending your shift.';
   }
 
   if (q.includes('kitchen') || q.includes('kds') || q.includes('prep') || q.includes('food')) {
@@ -1245,8 +1356,8 @@ function getAiResponse(query) {
   }
 
   if (q.includes('hi') || q.includes('hello') || q.includes('help')) {
-    return '👋 Hello! I am your <strong>Cheers POS AI Assistant</strong>. Ask me anything about taking orders, thermal printing, staff shifts, menu pricing, or system settings!';
+    return '👋 Hello! I am your <strong>Cheers POS AI Assistant</strong>. Ask me anything about taking orders, thermal printing, staff shifts, menu items, or system settings!';
   }
 
-  return '💡 <strong>Cheers POS Tip:</strong><br>You can ask me about thermal printing, printer IP (192.168.123.100), location (Vihiga Mbale), staff shift logouts, admin PIN (1234), or menu editing!';
+  return '💡 <strong>Cheers POS Tip:</strong><br>You can ask me about thermal printing, printer IP (192.168.123.100), location (Vihiga Mbale), staff shifts, or menu editing!';
 }
